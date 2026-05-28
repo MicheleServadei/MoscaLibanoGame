@@ -8,10 +8,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase (Versione Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=Black+Ops+One&display=swap');
@@ -20,48 +20,75 @@
         
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; user-select: none; }
         
-        #game-view { filter: contrast(1.2) saturate(1.3) brightness(0.95); position: absolute; inset: 0; z-index: 1; transition: filter 0.05s; }
-        #game-view.dashing { filter: contrast(1.5) saturate(1.8) hue-rotate(15deg) brightness(1.1); }
-        #game-view.stunned { filter: contrast(2) saturate(0.5) hue-rotate(-20deg) blur(2px); }
+        /* FILTRI E DINAMISMO VISIVO ACCESO */
+        #game-view { filter: contrast(1.35) saturate(1.6) brightness(0.95); position: absolute; inset: 0; z-index: 1; transition: filter 0.05s; }
+        #game-view.dashing { filter: contrast(1.7) saturate(2.2) hue-rotate(15deg) brightness(1.2); }
+        #game-view.stunned { filter: contrast(2.4) saturate(0.1) hue-rotate(-20deg) blur(4px); }
         
         /* KUROSAWA / MANGA MODE */
-        body.manga-active #game-view { filter: grayscale(100%) contrast(4) brightness(1.6) !important; transition: none; }
-        body.manga-active #manga-action-lines { opacity: 0.8; }
+        body.manga-active #game-view { filter: grayscale(100%) contrast(5) brightness(2) !important; transition: none; }
+        body.manga-active #manga-action-lines { opacity: 0.95; }
         
         #manga-action-lines {
             position: absolute; inset: 0; z-index: 15; pointer-events: none; opacity: 0; transition: opacity 0.05s;
-            background: repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 2deg, rgba(0,0,0,1) 2deg, rgba(0,0,0,1) 3deg);
-            mask-image: radial-gradient(circle at center, transparent 30%, black 100%);
-            -webkit-mask-image: radial-gradient(circle at center, transparent 30%, black 100%);
+            background: repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 2.5deg, rgba(0,0,0,1) 2.5deg, rgba(0,0,0,1) 3.5deg);
+            mask-image: radial-gradient(circle at center, transparent 25%, black 100%);
+            -webkit-mask-image: radial-gradient(circle at center, transparent 25%, black 100%);
         }
 
-        #overlay-fx { position: absolute; inset: 0; pointer-events: none; z-index: 10; opacity: 0.12; background-size: 20px 34px; background-image: radial-gradient(circle at 50% 0%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%), radial-gradient(circle at 0% 50%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%), radial-gradient(circle at 100% 50%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%), radial-gradient(circle at 50% 100%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%); mix-blend-mode: multiply; }
+        #overlay-fx { position: absolute; inset: 0; pointer-events: none; z-index: 10; opacity: 0.18; background-size: 20px 34px; background-image: radial-gradient(circle at 50% 0%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%), radial-gradient(circle at 0% 50%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%), radial-gradient(circle at 100% 50%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%), radial-gradient(circle at 50% 100%, transparent 45%, rgba(0,0,0,0.9) 50%, transparent 55%); mix-blend-mode: multiply; }
         
         .cyber-font { font-family: 'Black Ops One', cursive; }
         
         /* LOBBY PANELS */
-        .glass-panel { background: rgba(15, 10, 5, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.9); }
+        .glass-panel { background: rgba(10, 8, 5, 0.9); backdrop-filter: blur(20px); border: 2px solid var(--theme); box-shadow: 0 10px 40px rgba(0,0,0,0.95); transition: border-color 0.3s; }
         
-        /* NUOVO HUD (VISORE INCLINATO) */
+        /* NUOVO HUD (SOLIDO E UNIFICATO) */
         .hud-panel {
-            background: linear-gradient(135deg, rgba(15, 10, 5, 0.85), rgba(0, 0, 0, 0.95));
-            border-left: 4px solid var(--theme);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            border-right: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.8), inset 2px 0 15px rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
-            transform: skewX(-8deg);
+            background: #05070a;
+            border: 3px solid var(--theme);
+            box-shadow: 0 0 25px var(--theme), inset 0 0 15px rgba(0,0,0,0.9);
+            border-radius: 12px;
             position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .hud-panel > * { transform: skewX(8deg); } /* Raddrizza il contenuto interno */
+
+        /* EFFETTO ARCOBALENO EPILETTICO MEME PER COMBO E LEVEL UP */
+        @keyframes rainbow-epilepsy {
+            0% { color: #ff0055; transform: scale(1) rotate(-3deg); text-shadow: 0 0 15px #ff0055, 3px 3px 0px #000; }
+            20% { color: #00ffff; transform: scale(1.2) rotate(3deg); text-shadow: 0 0 25px #00ffff, -3px -3px 0px #000; }
+            40% { color: #ffff00; transform: scale(1.1) rotate(-5deg); text-shadow: 0 0 20px #ffff00, 3px -3px 0px #000; }
+            60% { color: #ff00ff; transform: scale(1.25) rotate(5deg); text-shadow: 0 0 30px #ff00ff, -3px 3px 0px #000; }
+            85% { color: #00ff66; transform: scale(1.15) rotate(-3deg); text-shadow: 0 0 15px #00ff66, 3px 3px 0px #000; }
+            100% { color: #ff0055; transform: scale(1) rotate(-3deg); text-shadow: 0 0 15px #ff0055, -3px -3px 0px #000; }
+        }
+        
+        .rainbow-combo-text {
+            animation: rainbow-epilepsy 0.15s infinite linear;
+            font-family: 'Black Ops One', cursive;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        /* SHAKE BRUTALE PER SCHERMO IN STILE BRAINROT / ARCADE GIGANTE */
+        @keyframes brutal-shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            15% { transform: translate(-10px, 8px) rotate(-1.5deg); }
+            30% { transform: translate(10px, -8px) rotate(2deg); }
+            45% { transform: translate(-12px, -3px) rotate(0.8deg); }
+            60% { transform: translate(12px, 5px) rotate(-1.5deg); }
+            75% { transform: translate(-8px, 8px) rotate(1.2deg); }
+            90% { transform: translate(8px, -4px) rotate(-0.5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .brutal-shaking { animation: brutal-shake 0.06s infinite; }
 
         .neon-text { text-shadow: 0 0 15px var(--theme), 0 0 30px var(--theme); color: white; transition: text-shadow 0.3s; }
         
         @keyframes pulseLobby { 0% { opacity: 0.85; } 50% { opacity: 1; text-shadow: 0 0 25px var(--theme), 0 0 50px var(--theme); } 100% { opacity: 0.85; } }
         .animate-pulse-glow { animation: pulseLobby 2s infinite; }
         
-        .btn-ui { position: relative; overflow: hidden; transition: 0.3s; }
+        .btn-ui { position: relative; overflow: hidden; transition: 0.3s; border-radius: 12px; }
         .btn-ui::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: 0.5s; }
         .btn-ui:hover::before { left: 100%; }
         .btn-ui:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--theme); border-color: var(--theme); }
@@ -80,11 +107,14 @@
         .hitmarker.headshot:before, .hitmarker.headshot:after { background: #ffdd00; box-shadow: 0 0 15px #ffaa00; }
 
         .dmg-flash { position: absolute; inset: 0; background: radial-gradient(circle, transparent 10%, rgba(255,20,0,0.85) 100%); z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.1s; mix-blend-mode: multiply; }
-        .shake { animation: shakeAnim 0.2s cubic-bezier(.36,.07,.19,.97) both; }
-        .shake-heavy { animation: shakeHeavyAnim 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        
-        @keyframes shakeAnim { 10%, 90% { transform: translate3d(-4px, 4px, 0); } 20%, 80% { transform: translate3d(6px, -6px, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 6px, 0); } 40%, 60% { transform: translate3d(8px, -6px, 0); } }
-        @keyframes shakeHeavyAnim { 10%, 90% { transform: translate3d(-10px, 10px, 0) rotate(-2deg); } 20%, 80% { transform: translate3d(15px, -15px, 0) rotate(3deg); } 30%, 50%, 70% { transform: translate3d(-20px, 15px, 0) rotate(-4deg); } 40%, 60% { transform: translate3d(20px, -15px, 0) rotate(4deg); } }
+
+        /* EFFETTI POP SUI PANNELLI HUD */
+        @keyframes hudPop {
+            0% { transform: scale(1); filter: brightness(1); }
+            45% { transform: scale(1.15); filter: brightness(1.8) drop-shadow(0 0 20px var(--theme)); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        .hud-pop { animation: hudPop 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
         .dmg-text { position: absolute; pointer-events: none; z-index: 25; font-family: 'Black Ops One', cursive; color: white; text-shadow: 0 3px 6px black, 0 0 15px var(--theme); animation: floatDmg 0.8s ease-out forwards; transform: translate(-50%, -50%); }
         @keyframes floatDmg { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -80%) scale(1.4); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(0.8); } }
@@ -103,7 +133,6 @@
         .anim-blink { animation: blink 0.5s infinite alternate; }
         @keyframes blink { 0% {opacity: 1;} 100% {opacity: 0.2;} }
         
-        /* Forma Esagonale per Radar */
         .hex-clip { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
     </style>
 </head>
@@ -116,6 +145,7 @@
     <div id="floating-ui" class="absolute inset-0 pointer-events-none z-25 overflow-hidden"></div>
     <div id="altitude-warning"><i class="fa-solid fa-triangle-exclamation"></i> ARIA RAREFATTA<br><span class="text-sm text-white font-sans font-bold tracking-widest uppercase">Gravità Acido Aumentata</span></div>
 
+    <!-- RETICOLO -->
     <div class="crosshair hidden" id="xhair">
         <svg viewBox="0 0 100 100" class="w-full h-full opacity-90" style="color: var(--theme); filter: drop-shadow(0 0 4px var(--theme))">
             <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="2.5" stroke-dasharray="8 8" fill="none" class="animate-[spin_4s_linear_infinite]" />
@@ -125,63 +155,103 @@
         <div class="hitmarker" id="hit-x"></div>
     </div>
 
-    <div id="hud" class="absolute inset-0 z-30 pointer-events-none hidden p-4 sm:p-6">
-        
-        <div class="absolute top-4 left-4 sm:top-6 sm:left-6 flex flex-col gap-3">
-            <div class="hud-panel px-5 py-2.5 flex flex-col gap-1">
-                <div class="text-[9px] text-gray-400 font-bold tracking-[0.2em] uppercase">Integrità Fisica</div>
-                <div id="hp-container" class="flex gap-2 text-2xl text-red-500 drop-shadow-[0_0_8px_red]">
-                    <i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i>
-                </div>
-            </div>
-            
-            <div class="hud-panel px-5 py-3 w-48 sm:w-56">
-                <div class="flex justify-between text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-[0.1em]">
-                    <span>Scatto <span class="bg-white/20 px-1 py-0.5 rounded text-[8px] text-white ml-1">SHIFT</span></span>
-                    <span id="dash-status" class="text-green-400">READY</span>
-                </div>
-                <div id="dash-bar" class="w-full h-2.5 bg-black/50 rounded-full overflow-hidden border border-white/10">
-                    <div id="dash-fill" class="h-full w-full" style="background: var(--theme); box-shadow: 0 0 10px var(--theme);"></div>
-                </div>
-            </div>
+    <!-- INDICATORE DI RICARICA OLOGRAFICO DINAMICO -->
+    <div id="reload-indicator" class="absolute top-[56%] left-1/2 -translate-x-1/2 hidden flex flex-col items-center gap-2 z-30 pointer-events-none transition-all duration-150 transform scale-100 opacity-100">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-biohazard text-xl animate-[spin_2s_linear_infinite]" style="color: var(--theme); filter: drop-shadow(0 0 5px var(--theme))"></i>
+            <span class="text-[11px] font-black tracking-[0.2em] uppercase" style="color: var(--theme); text-shadow: 0 0 8px var(--theme)">RICARICA FLUIDO [R]</span>
         </div>
-
-        <div class="absolute top-4 left-1/2 -translate-x-1/2 flex gap-3 sm:gap-6">
-            <div class="hud-panel px-4 sm:px-6 py-2 flex flex-col items-center justify-center">
-                <span class="text-[9px] tracking-[0.2em] text-gray-400 font-bold uppercase mb-0.5">Tempo</span>
-                <span class="text-3xl sm:text-4xl cyber-font text-white leading-none drop-shadow-md" id="hud-time">60</span>
-            </div>
-            <div class="hud-panel px-4 sm:px-6 py-2 flex flex-col items-center justify-center">
-                <span class="text-[9px] tracking-[0.2em] text-gray-400 font-bold uppercase mb-0.5">Score</span>
-                <span class="text-3xl sm:text-4xl cyber-font leading-none" id="hud-score" style="color: var(--theme); text-shadow: 0 0 15px var(--theme)">0</span>
-            </div>
-        </div>
-
-        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 hud-panel p-2">
-            <div class="text-[9px] tracking-[0.2em] text-center text-gray-400 font-bold uppercase mb-2">Visore</div>
-            <div class="w-24 h-24 sm:w-32 sm:h-32 bg-black/90 relative overflow-hidden hex-clip border-2 border-[var(--theme)]/80" style="box-shadow: inset 0 0 15px var(--theme);">
-                <div class="absolute inset-1 border border-white/10 hex-clip"></div>
-                <div class="absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_10px_white]"></div>
-                <div class="absolute top-1/2 left-1/2 w-full h-1 origin-left animate-[spin_1.5s_linear_infinite]" style="background: linear-gradient(90deg, transparent, var(--theme)); opacity: 0.8"></div>
-                <div id="radar-dots" class="absolute inset-0"></div>
-            </div>
-        </div>
-
-        <div class="absolute bottom-32 left-1/2 -translate-x-1/2 sm:bottom-6 sm:left-auto sm:right-6 sm:translate-x-0 hud-panel px-5 py-3 sm:px-8 sm:py-4 flex flex-col items-center sm:items-end">
-            <div class="text-[10px] text-gray-400 font-bold mb-2.5 uppercase tracking-[0.2em]">Ghiandola Acida</div>
-            <div id="ammo-clip" class="flex gap-1.5 sm:gap-2 text-xl sm:text-2xl drop-shadow-[0_0_8px_var(--theme)]">
-                </div>
+        <div class="w-32 h-2.5 bg-black/70 rounded-full overflow-hidden border border-white/20 p-[1px]">
+            <div id="reload-fill" class="h-full rounded-full transition-all duration-75" style="background: var(--theme); box-shadow: 0 0 10px var(--theme); width: 0%;"></div>
         </div>
     </div>
 
+    <!-- HUD COMPLETO, SOLIDO E UNIFICATO -->
+    <div id="hud" class="absolute inset-0 z-30 pointer-events-none hidden p-4 sm:p-6 flex flex-col justify-between">
+        <div class="w-full flex justify-between items-start gap-4">
+            
+            <!-- Sinistra: Vita & Dash -->
+            <div id="panel-hp" class="hud-panel p-4 flex flex-col gap-4 w-60">
+                <div class="flex flex-col gap-1">
+                    <div class="text-[9px] text-gray-400 font-bold tracking-[0.2em] uppercase">Integrità Fisica</div>
+                    <div id="hp-container" class="flex gap-2 text-2xl text-red-500 drop-shadow-[0_0_8px_red]">
+                        <i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i><i class="fa-solid fa-heart"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em]">
+                        <span id="dash-status">SCATTO <span class="bg-white/20 px-1 py-0.5 rounded text-[8px] text-white ml-1">SHIFT</span></span>
+                    </div>
+                    <div class="w-full h-2.5 bg-black/60 rounded-full overflow-hidden border border-white/10 p-[1px]">
+                        <div id="dash-fill" class="h-full w-full rounded-full transition-all" style="background: var(--theme); box-shadow: 0 0 10px var(--theme);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Centro: Tempo, Score, Livello e Combo unificati in un blocco monolitico -->
+            <div class="hud-panel px-8 py-3 flex gap-8 items-center min-w-[420px] justify-center relative flex-col sm:flex-row">
+                <!-- Grado Drone / Livello di progressione -->
+                <div class="flex flex-col items-center justify-center">
+                    <span class="text-[9px] tracking-[0.2em] text-cyan-400 font-bold uppercase mb-1">GRADO SINC</span>
+                    <span class="text-xs font-black uppercase text-center w-28 truncate font-mono text-yellow-500" id="hud-level-name">LARVA</span>
+                </div>
+                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+
+                <!-- XP Progress Bar -->
+                <div class="flex flex-col gap-0.5 justify-center">
+                    <span class="text-[8px] tracking-[0.2em] text-gray-400 font-bold uppercase text-center">Evoluzione Mutagena</span>
+                    <div class="w-28 h-2 bg-black/80 rounded-full border border-white/10 p-[0.5px]">
+                        <div id="xp-bar" class="h-full bg-cyan-400 rounded-full transition-all" style="width: 0%; box-shadow: 0 0 6px #06b6d4;"></div>
+                    </div>
+                </div>
+                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+
+                <div id="panel-time" class="flex flex-col items-center justify-center">
+                    <span class="text-[10px] tracking-[0.2em] text-gray-400 font-bold uppercase mb-1">Tempo</span>
+                    <span class="text-4xl cyber-font text-white leading-none drop-shadow-md" id="hud-time">60</span>
+                </div>
+                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                
+                <div id="panel-score" class="flex flex-col items-center justify-center transition-all">
+                    <span class="text-[10px] tracking-[0.2em] text-gray-400 font-bold uppercase mb-1">Score</span>
+                    <span class="text-4xl cyber-font leading-none transition-transform duration-75 neon-text" id="hud-score">0</span>
+                </div>
+                
+                <!-- PANNELLO COMBO ADRENALINICO IN BASSO SULL'HUD -->
+                <div id="panel-combo" class="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-black/95 border border-white/20 px-5 py-1 rounded-full opacity-0 scale-90 transition-all duration-200 flex items-center gap-2 shadow-[0_4px_15px_rgba(0,0,0,0.8)] z-30">
+                    <span class="text-[10px] font-black tracking-[0.15em] text-gray-400 uppercase">COMBO</span>
+                    <span id="hud-combo" class="text-xl cyber-font text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">X0</span>
+                </div>
+            </div>
+
+            <!-- Destra: Radar composito -->
+            <div class="hud-panel p-3 flex flex-col items-center">
+                <div class="text-[10px] tracking-[0.2em] text-gray-400 font-bold uppercase mb-2">Visore Tattico</div>
+                <div class="w-24 h-24 sm:w-28 sm:h-28 bg-black/80 rounded-2xl relative overflow-hidden border border-white/10 shadow-inner">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.05)_1px,transparent_1px)]" style="background-size: 10px 10px;"></div>
+                    <div class="absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_10px_white]"></div>
+                    <div class="absolute top-1/2 left-1/2 w-full h-1 origin-left animate-[spin_1.5s_linear_infinite]" style="background: linear-gradient(90deg, transparent, var(--theme)); opacity: 0.6"></div>
+                    <div id="radar-dots" class="absolute inset-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AMMO (Angolo basso a destra) -->
+        <div class="absolute bottom-6 right-6 hud-panel px-6 py-4 flex flex-col items-end transition-all duration-150" id="ammo-panel-parent">
+            <div class="text-[10px] text-gray-400 font-bold mb-2 uppercase tracking-[0.2em]">Riserva Acida [R]</div>
+            <div id="ammo-clip" class="flex gap-1.5 sm:gap-2 text-xl sm:text-2xl drop-shadow-[0_0_8px_var(--theme)]"></div>
+        </div>
+    </div>
+
+    <!-- LOBBY -->
     <div id="lobby" class="absolute inset-0 z-40 flex items-center justify-center p-4 transition-opacity duration-500" style="background: radial-gradient(circle at center, rgba(163,230,53,0.15) 0%, rgba(0,0,0,0.85) 70%);">
-        <div class="glass-panel w-full max-w-5xl rounded-3xl overflow-hidden border border-[var(--theme)]/30 relative flex flex-col md:flex-row shadow-[0_0_80px_rgba(0,0,0,1)]">
+        <div class="glass-panel w-full max-w-5xl rounded-3xl overflow-hidden relative flex flex-col md:flex-row">
             
             <div class="p-8 md:p-14 text-center relative z-10 w-full md:w-[55%] border-b md:border-b-0 md:border-r border-white/10 bg-black/30">
                 <h2 class="text-xs tracking-[0.6em] text-yellow-500 font-black mb-3 uppercase drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]">Operazione Acido</h2>
                 <h1 class="text-6xl md:text-7xl cyber-font neon-text animate-pulse-glow mb-8 tracking-wider">FLY STRIKE</h1>
                 
-                <div class="bg-black/60 p-4 rounded-2xl border border-[var(--theme)]/20 mb-8 inline-block backdrop-blur-md shadow-inner">
+                <div class="bg-black/60 p-4 rounded-2xl border border-[var(--theme)]/20 mb-8 inline-block backdrop-blur-md shadow-inner transition-colors duration-300">
                     <p class="text-[10px] font-black text-gray-300 tracking-[0.2em] mb-3 uppercase">Seleziona Siero Mutageno</p>
                     <div class="flex gap-4 justify-center">
                         <div class="color-selector active bg-[#a3e635] text-[#a3e635]" data-hex="0xa3e635" data-css="#a3e635"></div>
@@ -193,7 +263,7 @@
 
                 <div class="max-w-sm mx-auto space-y-4 relative min-h-[160px]">
                     <div id="ui-loading" class="absolute inset-0 flex items-center justify-center">
-                        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-[var(--theme)] drop-shadow-[0_0_15px_var(--theme)]"></i>
+                        <i class="fa-solid fa-circle-notch fa-spin text-4xl neon-text"></i>
                     </div>
 
                     <div id="ui-login-box" class="hidden flex flex-col gap-4">
@@ -207,15 +277,15 @@
 
                     <div id="ui-nick-box" class="hidden flex flex-col gap-4">
                         <p class="text-xs text-yellow-500 uppercase font-black tracking-widest">Identificazione Pilota</p>
-                        <input type="text" id="inp-nick" placeholder="NICKNAME" class="w-full bg-black/60 border-2 border-[var(--theme)]/50 rounded-xl py-4 text-center text-xl cyber-font text-white focus:outline-none focus:border-[var(--theme)] transition shadow-[0_0_20px_rgba(0,0,0,0.5)] uppercase" maxlength="12">
-                        <button id="btn-save-nick" class="btn-ui w-full py-4 rounded-xl font-black tracking-widest text-black bg-[var(--theme)] text-sm">
+                        <input type="text" id="inp-nick" placeholder="NICKNAME" class="w-full bg-black/60 border-2 rounded-xl py-4 text-center text-xl cyber-font text-white focus:outline-none transition shadow-[0_0_20px_rgba(0,0,0,0.5)] uppercase" style="border-color: var(--theme)">
+                        <button id="btn-save-nick" class="btn-ui w-full py-4 rounded-xl font-black tracking-widest text-black text-sm" style="background: var(--theme)">
                             CONFERMA E PROCEDI
                         </button>
                     </div>
 
                     <div id="ui-play-box" class="hidden flex flex-col gap-4">
                         <div class="text-sm text-white font-black cyber-font tracking-widest bg-black/60 py-3 rounded-xl border border-white/10" id="welcome-text"></div>
-                        <div class="text-[11px] text-gray-300 font-bold uppercase tracking-widest">Record Personale: <span id="lobby-highscore" class="text-[var(--theme)] cyber-font text-base ml-2 drop-shadow-[0_0_5px_var(--theme)]">0</span></div>
+                        <div class="text-[11px] text-gray-300 font-bold uppercase tracking-widest">Record Personale: <span id="lobby-highscore" class="cyber-font text-base ml-2 neon-text">0</span></div>
                         <button id="btn-play" class="btn-ui w-full py-5 rounded-xl cyber-font text-2xl font-bold tracking-widest text-black flex items-center justify-center gap-3 mt-2" style="background: var(--theme)">
                             <i class="fa-solid fa-biohazard text-3xl"></i> DECOLLA
                         </button>
@@ -224,9 +294,10 @@
                 </div>
             </div>
 
+            <!-- Lato Destro: Classifica Globale -->
             <div class="w-full md:w-[45%] p-6 md:p-10 flex flex-col bg-black/60 relative">
                 <div class="flex items-center justify-between mb-6 relative z-10">
-                    <h3 class="text-xl cyber-font tracking-widest text-white"><i class="fa-solid fa-globe text-[var(--theme)] mr-3 drop-shadow-[0_0_10px_var(--theme)]"></i> TOP MONDIALE</h3>
+                    <h3 class="text-xl cyber-font tracking-widest text-white"><i class="fa-solid fa-globe mr-3 neon-text"></i> TOP MONDIALE</h3>
                     <button id="btn-refresh-lb" class="text-gray-400 hover:text-white transition p-2 bg-white/5 rounded-lg"><i class="fa-solid fa-rotate-right"></i></button>
                 </div>
                 
@@ -239,6 +310,7 @@
         </div>
     </div>
 
+    <!-- GAMEOVER -->
     <div id="gameover" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-xl hidden flex flex-col items-center justify-center p-4">
         <div class="glass-panel p-10 rounded-3xl border border-red-500 text-center max-w-lg w-full relative overflow-hidden shadow-[0_0_50px_rgba(255,0,0,0.4)]">
             <h1 class="text-6xl cyber-font text-red-500 mb-3 drop-shadow-[0_0_25px_rgba(255,0,0,0.8)]">DISTRUTTO</h1>
@@ -268,12 +340,16 @@
         </div>
     </div>
 
+    <!-- MOBILE CONTROLS -->
     <div id="mob-ctrl" class="absolute inset-0 z-30 pointer-events-none hidden sm:hidden">
         <div id="joy-base" class="absolute bottom-6 left-6 w-28 h-28 bg-black/40 border-2 border-white/20 rounded-full pointer-events-auto touch-none backdrop-blur-md flex items-center justify-center shadow-[0_0_20px_rgba(0,0,0,0.5)]">
             <div id="joy-knob" class="w-12 h-12 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)] pointer-events-none border border-white/30" style="background: radial-gradient(circle, var(--theme), #111)"></div>
         </div>
         <div id="look-zone" class="absolute top-0 right-0 w-1/2 h-full pointer-events-auto touch-none"></div>
-        <div class="absolute bottom-6 right-6 flex gap-4 pointer-events-auto">
+        <div class="absolute bottom-6 right-6 flex gap-3 sm:gap-4 pointer-events-auto items-center">
+            <button id="m-reload" class="w-14 h-14 rounded-full bg-zinc-800/90 border-2 border-zinc-500 text-white text-xl shadow-[0_0_15px_rgba(255,255,255,0.2)] active:scale-90 transition flex items-center justify-center backdrop-blur-md">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
             <button id="m-dash" class="w-14 h-14 rounded-full bg-blue-500/80 border-2 border-blue-300 text-white text-xl shadow-[0_0_20px_blue] active:scale-90 transition flex items-center justify-center backdrop-blur-md">
                 <i class="fa-solid fa-wind"></i>
             </button>
@@ -285,7 +361,7 @@
 
 <script>
 // ==========================================
-// AUDIO & SUONI UI (Ottimizzati)
+// AUDIO & SUONI UI
 // ==========================================
 let audioCtx;
 function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -307,6 +383,9 @@ function playSfx(type) {
     else if(type === 'click') { o.type = 'square'; o.frequency.setValueAtTime(1500, t); o.frequency.exponentialRampToValueAtTime(800, t+0.1); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.1); o.start(); o.stop(t+0.1); }
     else if(type === 'jump') { o.type = 'triangle'; o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(600, t+0.3); g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0.001, t+0.3); o.start(); o.stop(t+0.3); }
     else if(type === 'record') { o.type = 'square'; o.frequency.setValueAtTime(400, t); o.frequency.linearRampToValueAtTime(800, t+0.2); o.frequency.linearRampToValueAtTime(1200, t+0.4); g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0.001, t+0.8); o.start(); o.stop(t+0.8); }
+    else if(type === 'levelup') { 
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(200, t); o.frequency.linearRampToValueAtTime(800, t+0.15); o.frequency.linearRampToValueAtTime(1800, t+0.4); g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0.001, t+0.5); o.start(); o.stop(t+0.5);
+    }
 }
 
 document.querySelectorAll('button, .color-selector').forEach(btn => { btn.addEventListener('mouseenter', () => playSfx('hover')); btn.addEventListener('click', () => { initAudio(); playSfx('click'); }); });
@@ -316,7 +395,7 @@ function startDrone() { if(!audioCtx) return; if(droneOsc) droneOsc.stop(); dron
 function stopDrone() { if(droneGain) droneGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); }
 
 // ==========================================
-// FIREBASE & CLASSIFICA
+// FIREBASE CON LE TUE CREDENZIALI
 // ==========================================
 const FB = {
     apiKey: "AIzaSyAj7jEGQGr0Xse5hy31SMrMBg8ZIxWORBk",
@@ -327,10 +406,11 @@ const FB = {
     appId: "1:80538424696:web:12c85052c0b285ed8d248d",
     measurementId: "G-C0FBV97VSE"
 };
+
 if(!firebase.apps.length) firebase.initializeApp(FB);
 const auth = firebase.auth(), db = firebase.firestore();
 
-let ME = { nick: '', uid: null, guest: false, bestScore: 0 };
+let ME = { nick: '', uid: null, guest: false, highScore: 0 };
 const ui_loading = document.getElementById('ui-loading'), ui_loginBox = document.getElementById('ui-login-box'), ui_nickBox = document.getElementById('ui-nick-box'), ui_playBox = document.getElementById('ui-play-box');
 
 function showUI(box) { [ui_loading, ui_loginBox, ui_nickBox, ui_playBox].forEach(b => b.classList.add('hidden')); box.classList.remove('hidden'); }
@@ -339,7 +419,7 @@ async function fetchLeaderboard() {
     const lbContainer = document.getElementById('leaderboard-container');
     lbContainer.innerHTML = '<div class="flex justify-center items-center h-full text-[var(--theme)]"><i class="fa-solid fa-circle-notch fa-spin text-3xl drop-shadow-[0_0_10px_currentColor]"></i></div>';
     try {
-        const snap = await db.collection('players').orderBy('bestScore', 'desc').limit(15).get();
+        const snap = await db.collection('flystrike_users').orderBy('highScore', 'desc').limit(15).get();
         if(snap.empty) { lbContainer.innerHTML = '<div class="text-center text-gray-500 font-bold uppercase tracking-widest mt-6">Nessun punteggio registrato.</div>'; return; }
         
         let html = '<table class="w-full text-left text-sm"><thead class="text-[10px] text-yellow-500 font-black uppercase tracking-widest border-b border-white/10"><tr><th class="p-3">Rank</th><th class="p-3">Pilota</th><th class="p-3 text-right">Score</th></tr></thead><tbody>';
@@ -348,7 +428,7 @@ async function fetchLeaderboard() {
             const data = doc.data();
             let rankStyle = rank === 1 ? 'text-yellow-400 text-xl drop-shadow-[0_0_8px_yellow]' : rank === 2 ? 'text-gray-300 text-lg' : rank === 3 ? 'text-orange-400 text-lg' : 'text-gray-500';
             let isMe = (data.nickname === ME.nick) ? 'bg-[var(--theme)]/20 border-l-4 border-[var(--theme)]' : 'border-b border-white/5 hover:bg-white/5 transition';
-            html += `<tr class="${isMe}"><td class="p-3 font-bold cyber-font ${rankStyle}">#${rank}</td><td class="p-3 font-black tracking-widest uppercase text-white">${data.nickname || 'IGNOTO'}</td><td class="p-3 text-right cyber-font text-[var(--theme)] text-lg">${data.bestScore || 0}</td></tr>`;
+            html += `<tr class="${isMe}"><td class="p-3 font-bold cyber-font ${rankStyle}">#${rank}</td><td class="p-3 font-black tracking-widest uppercase text-white">${data.nickname || 'IGNOTO'}</td><td class="p-3 text-right cyber-font text-[var(--theme)] text-lg">${data.highScore || 0}</td></tr>`;
             rank++;
         });
         html += '</tbody></table>';
@@ -360,12 +440,12 @@ document.getElementById('btn-refresh-lb').onclick = fetchLeaderboard;
 async function checkAndSaveScore(finalScore) {
     if(ME.guest || finalScore <= 0) return false;
     try {
-        const docRef = db.collection('players').doc(ME.uid);
+        const docRef = db.collection('flystrike_users').doc(ME.uid);
         const doc = await docRef.get();
-        let currentHigh = doc.exists ? (doc.data().bestScore || 0) : 0;
+        let currentHigh = doc.exists ? (doc.data().highScore || 0) : 0;
         if(finalScore > currentHigh) {
-            await docRef.set({ bestScore: finalScore, nickname: ME.nick }, { merge: true });
-            ME.bestScore = finalScore; document.getElementById('lobby-highscore').innerText = ME.bestScore;
+            await docRef.set({ highScore: finalScore, nickname: ME.nick }, { merge: true });
+            ME.highScore = finalScore; document.getElementById('lobby-highscore').innerText = ME.highScore;
             fetchLeaderboard(); return true;
         }
     } catch(e) { console.error("Score locale", e); }
@@ -376,11 +456,11 @@ auth.onAuthStateChanged(async user => {
     if (user) {
         ME.uid = user.uid; ME.guest = false;
         try {
-            const doc = await db.collection('players').doc(user.uid).get();
+            const doc = await db.collection('flystrike_users').doc(user.uid).get();
             if (doc.exists && doc.data().nickname) {
-                ME.nick = doc.data().nickname; ME.bestScore = doc.data().bestScore || 0;
+                ME.nick = doc.data().nickname; ME.highScore = doc.data().highScore || 0;
                 document.getElementById('welcome-text').innerHTML = `BENTORNATO, <span class="text-[var(--theme)]">${ME.nick}</span>`;
-                document.getElementById('lobby-highscore').innerText = ME.bestScore; showUI(ui_playBox);
+                document.getElementById('lobby-highscore').innerText = ME.highScore; showUI(ui_playBox);
             } else { showUI(ui_nickBox); }
         } catch(e) { 
             ME.nick = user.displayName ? user.displayName.split(' ')[0].toUpperCase() : 'PILOT_X';
@@ -395,14 +475,14 @@ document.getElementById('btn-save-nick').onclick = async () => {
     const n = document.getElementById('inp-nick').value.trim().toUpperCase();
     if(n.length < 3) return alert("Inserisci almeno 3 caratteri!");
     showUI(ui_loading);
-    try { await db.collection('players').doc(ME.uid).set({ nickname: n, bestScore: 0 }, { merge: true }); ME.nick = n; ME.bestScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-[var(--theme)]">${ME.nick}</span>`; showUI(ui_playBox); fetchLeaderboard(); } 
+    try { await db.collection('flystrike_users').doc(ME.uid).set({ nickname: n, highScore: 0 }, { merge: true }); ME.nick = n; ME.highScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-[var(--theme)]">${ME.nick}</span>`; showUI(ui_playBox); fetchLeaderboard(); } 
     catch(e) { ME.nick = n; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-[var(--theme)]">${ME.nick}</span>`; showUI(ui_playBox); }
 };
-document.getElementById('btn-guest').onclick = () => { ME.guest = true; ME.uid = null; ME.nick = 'OSPITE_' + Math.floor(Math.random()*999); ME.bestScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-gray-400">${ME.nick}</span>`; document.getElementById('lobby-highscore').innerText = "0 (Ospite)"; showUI(ui_playBox); fetchLeaderboard(); };
+document.getElementById('btn-guest').onclick = () => { ME.guest = true; ME.uid = null; ME.nick = 'OSPITE_' + Math.floor(Math.random()*999); ME.highScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-gray-400">${ME.nick}</span>`; document.getElementById('lobby-highscore').innerText = "0 (Ospite)"; showUI(ui_playBox); fetchLeaderboard(); };
 document.getElementById('btn-logout').onclick = () => { auth.signOut(); showUI(ui_loginBox); };
 
 // ==========================================
-// GLOBALS GIOCO E CACHING 
+// GLOBALS GIOCO E PROGRESSIONE MUTAGENA
 // ==========================================
 let gameActive = false;
 let score = 0, timeLeft = 60, hp = 3, ammo = 12, maxCombo = 0, currentCombo = 0;
@@ -411,6 +491,24 @@ let gameTimer = null, spawnTimer = 0, ammoTimer = 0;
 let hitStopTimer = 0; 
 let playerVelocity = new THREE.Vector3(); 
 let stunTimer = 0; 
+let stamina = 100;
+let isReloading = false, reloadTimer = 0;
+const RELOAD_TIME = 1.2; 
+const ammoPickups = [];
+
+// Variabili di Progressione (Level Up)
+let currentLevel = 1;
+let currentXp = 0;
+let nextLevelXp = 1000;
+
+// Gradi Mutageni del Drone Mosca
+const LEVEL_NAMES = {
+    1: "LARVA ACIDA",
+    2: "COPPIDE CINETICA",
+    3: "VESPA SPEZZA-SCAFO",
+    4: "SCIAME ORMONALE",
+    5: "REGINA DELL'APOCALISSE"
+};
 
 const globalProjGeo = new THREE.SphereGeometry(0.35, 6, 6);
 const globalProjMat = new THREE.MeshBasicMaterial({color: 0xa3e635}); 
@@ -429,7 +527,59 @@ let dustSystem;
 const ARENA = 180;
 
 // ==========================================
-// SISTEMA ATMOSFERA DINAMICA
+// LOGICA PROGRESSIONE DRONE (IPER-STIMOLANTE)
+// ==========================================
+function addXp(amount) {
+    if(!gameActive) return;
+    currentXp += amount;
+    
+    const pct = Math.min(100, (currentXp / nextLevelXp) * 100);
+    const xpBar = document.getElementById('xp-bar');
+    if(xpBar) xpBar.style.width = pct + '%';
+
+    if(currentXp >= nextLevelXp) {
+        levelUp();
+    }
+}
+
+function levelUp() {
+    if (currentLevel >= 5) return; 
+    currentLevel++;
+    currentXp = 0;
+    nextLevelXp = Math.floor(nextLevelXp * 1.5);
+    
+    const lvlName = document.getElementById('hud-level-name');
+    if(lvlName) lvlName.innerText = LEVEL_NAMES[currentLevel];
+
+    playSfx('levelup');
+
+    document.body.classList.add('brutal-shaking');
+    document.body.classList.add('manga-active');
+    
+    const banner = document.createElement('div');
+    banner.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-50 rainbow-combo-text';
+    banner.style.fontSize = '4.5rem';
+    banner.style.lineHeight = '1.1';
+    banner.innerHTML = `EVOLUZIONE DRONE!!!<br><span style="font-size:2rem; text-shadow:0 0 10px black">SBLOCCATO: ${LEVEL_NAMES[currentLevel]}</span>`;
+    document.getElementById('floating-ui').appendChild(banner);
+
+    hp = Math.min(3, hp + 1);
+    const hps = document.getElementById('hp-container').children; 
+    for(let i=0; i<3; i++) hps[i].className = i < hp ? 'fa-solid fa-heart animate-pulse' : 'fa-solid fa-heart opacity-20 text-gray-700';
+    ammo = 12; updateAmmoUI();
+
+    triggerHudPop('panel-hp');
+    triggerHudPop('ammo-panel-parent');
+
+    setTimeout(() => {
+        document.body.classList.remove('brutal-shaking');
+        document.body.classList.remove('manga-active');
+        banner.remove();
+    }, 1200);
+}
+
+// ==========================================
+// GESTIONE ATMOSFERA E RICARICHE COLORATE
 // ==========================================
 function updateAtmosphere(hexColor, cssColor) {
     if(!scene) return;
@@ -445,19 +595,33 @@ function updateAtmosphere(hexColor, cssColor) {
     if(dustMat) dustMat.color = themeC;
     globalProjMat.color.setHex(hexColor); 
     
+    ammoPickups.forEach(p => {
+        if(p.material) { p.material.color.setHex(hexColor); p.material.emissive.setHex(hexColor); }
+        p.children.forEach(c => { if(c instanceof THREE.PointLight) c.color.setHex(hexColor); });
+    });
+    
     const lobby = document.getElementById('lobby');
     if(lobby) lobby.style.background = `radial-gradient(circle at center, ${cssColor}22 0%, rgba(0,0,0,0.85) 70%)`;
 }
+
+// COLLINETTE ADDOLCITE E ABBASSATE PERFETTAMENTE ALLE COLLISIONI
+function getTerrainH(x,z) { return Math.sin(x*0.03)*Math.cos(z*0.03)*1.8 + Math.sin(x*0.07+z*0.05)*0.5; }
 
 const root = document.documentElement;
 document.querySelectorAll('.color-selector').forEach(btn => {
     btn.addEventListener('click', () => { 
         document.querySelectorAll('.color-selector').forEach(b => b.classList.remove('active')); 
         btn.classList.add('active'); 
-        currentTheme.hex = parseInt(btn.dataset.hex); 
+        currentTheme.hex = Number(btn.dataset.hex); 
         currentTheme.css = btn.dataset.css; 
         root.style.setProperty('--theme', currentTheme.css); 
         updateAtmosphere(currentTheme.hex, currentTheme.css);
+        
+        const dashBar = document.getElementById('dash-fill');
+        if(stamina >= 100 && dashBar) {
+            dashBar.style.backgroundColor = currentTheme.css;
+            dashBar.style.boxShadow = `0 0 10px ${currentTheme.css}`;
+        }
     });
 });
 
@@ -499,10 +663,8 @@ function init3D() {
     clock = new THREE.Clock(); requestAnimationFrame(renderLoop);
 }
 
-function getTerrainH(x,z) { return Math.sin(x*0.04)*Math.cos(z*0.04)*7 + Math.sin(x*0.08+z*0.06)*2.5; }
-
 function buildLibano() {
-    const geo = new THREE.PlaneGeometry(ARENA*2, ARENA*2, 80, 80); const pos = geo.attributes.position;
+    const geo = new THREE.PlaneGeometry(ARENA*2, ARENA*2, 120, 120); const pos = geo.attributes.position;
     for(let i=0; i<pos.count; i++) pos.setZ(i, getTerrainH(pos.getX(i), pos.getY(i))); geo.computeVertexNormals();
     ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xc48245, roughness: 0.9, flatShading:true })); 
     ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
@@ -545,6 +707,27 @@ function buildSpeedLines() {
     }
 }
 
+function spawnAmmoPickup(x, z) {
+    const mat = new THREE.MeshStandardMaterial({
+        color: currentTheme.hex,
+        emissive: currentTheme.hex,
+        emissiveIntensity: 1.2,
+        roughness: 0.1,
+        metalness: 0.9,
+        flatShading: true
+    });
+    const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 0), mat);
+    let y = getTerrainH(x, z) + 1.2;
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    
+    const pLight = new THREE.PointLight(currentTheme.hex, 1.5, 10);
+    m.add(pLight);
+    
+    m.userData = { baseY: y, rotSpeed: 1.5 + Math.random()*2 };
+    scene.add(m); ammoPickups.push(m);
+}
+
 function spawnEnemy() {
     const g = new THREE.Group();
     const skin = new THREE.MeshStandardMaterial({color: 0x8ab3cc, roughness: 0.6}); 
@@ -564,40 +747,69 @@ function spawnEnemy() {
     g.position.set(x, getTerrainH(x,z), z);
     
     let difficultyMult = 1 + (60 - timeLeft) / 30;
-    
     g.userData = { speed: (6 + Math.random()*5) * difficultyMult, hp: Math.floor(2 * difficultyMult), anim: Math.random()*10, vy: 0, jumpCD: 0, flashTimer: 0, strafeAngle: 0, strafeTimer: 0 };
     scene.add(g); enemies.push(g);
 }
 
 // ==========================================
-// HUD & EFFETTI GRAFICI (NUOVO HUD)
+// GAMEPLAY JUICE E STIMOLAZIONE CEREBRALE
 // ==========================================
-function updateAmmoUI() {
-    const box = document.getElementById('ammo-clip'); box.innerHTML = ''; 
-    for(let i=0; i<12; i++) { 
-        const d = document.createElement('i'); 
-        d.className = 'fa-solid fa-droplet transition-all duration-200'; 
-        if(i < ammo) { d.style.color = currentTheme.css; d.style.transform = 'scale(1)'; d.style.filter = `drop-shadow(0 0 5px ${currentTheme.css})`; } 
-        else { d.style.color = 'rgba(255,255,255,0.1)'; d.style.transform = 'scale(0.8)'; d.style.filter = 'none'; }
-        box.appendChild(d); 
-    } 
+function triggerHudPop(elementId) {
+    const el = document.getElementById(elementId);
+    if(el) {
+        el.classList.remove('hud-pop');
+        void el.offsetWidth; 
+        el.classList.add('hud-pop');
+    }
 }
 
-function updateRadar() {
-    const rd = document.getElementById('radar-dots'); rd.innerHTML = ''; 
-    const isMob = window.innerWidth < 640; const radSc = isMob ? 42/100 : 56/100;
-    enemies.forEach(e => { 
-        let dx = e.position.x - camera.position.x, dz = e.position.z - camera.position.z, a = -camRot.yaw, rx = dx*Math.cos(a) - dz*Math.sin(a), rz = dx*Math.sin(a) + dz*Math.cos(a); 
-        if(rx*rx+rz*rz < 10000) { 
-            const d = document.createElement('div'); d.className = 'absolute w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_red]'; 
-            d.style.left = `calc(50% + ${rx*radSc}px)`; d.style.top = `calc(50% + ${rz*radSc}px)`; d.style.transform = 'translate(-50%,-50%)'; 
-            rd.appendChild(d); 
-        } 
-    }); 
+function updateComboUI() {
+    const panel = document.getElementById('panel-combo');
+    const txt = document.getElementById('hud-combo');
+    if(currentCombo > 0) {
+        panel.classList.remove('opacity-0', 'scale-90');
+        panel.classList.add('opacity-100', 'scale-100', 'combo-pulse');
+        txt.innerText = `X${currentCombo}`;
+        
+        if(currentCombo >= 7) { txt.className = 'text-2xl cyber-font text-red-500 drop-shadow-[0_0_15px_red]'; panel.style.borderColor = '#ef4444'; }
+        else if(currentCombo >= 4) { txt.className = 'text-xl cyber-font text-yellow-400 drop-shadow-[0_0_10px_orange]'; panel.style.borderColor = '#fbbf24'; }
+        else { txt.className = 'text-lg cyber-font text-white'; panel.style.borderColor = 'rgba(255,255,255,0.2)'; }
+    } else {
+        panel.classList.add('opacity-0', 'scale-90');
+        panel.classList.remove('opacity-100', 'scale-100', 'combo-pulse');
+    }
 }
 
-function explode(pos, hexColor) {
-    const explodeMat = new THREE.MeshBasicMaterial({color: hexColor});
+function spawnComboParticle(pos3D, comboMultiplier) {
+    const vec = pos3D.clone(); vec.y += 1.0; vec.project(camera); if(vec.z > 1) return;
+    const startX = (vec.x * 0.5 + 0.5) * window.innerWidth;
+    const startY = (vec.y * -0.5 + 0.5) * window.innerHeight;
+
+    const el = document.createElement('div');
+    el.className = 'absolute pointer-events-none z-40 rainbow-combo-text';
+    
+    el.innerHTML = `COMBO x${comboMultiplier}!!!`;
+    el.style.left = startX + 'px'; el.style.top = startY + 'px';
+    el.style.fontSize = '3.5rem'; el.style.transform = 'translate(-50%, -50%)';
+    el.style.textShadow = '0 6px 15px black';
+    
+    document.getElementById('floating-ui').appendChild(el);
+    
+    const targetX = window.innerWidth / 2;
+    const targetY = 80; 
+
+    el.animate([
+        { left: startX + 'px', top: startY + 'px', transform: 'translate(-50%, -50%) scale(0) rotate(-10deg)', opacity: 0 },
+        { left: startX + 'px', top: (startY - 50) + 'px', transform: 'translate(-50%, -50%) scale(1.6) rotate(15deg)', opacity: 1, offset: 0.15 },
+        { left: startX + 'px', top: (startY - 70) + 'px', transform: 'translate(-50%, -50%) scale(1.1) rotate(-8deg)', opacity: 1, offset: 0.4 },
+        { left: targetX + 'px', top: targetY + 'px', transform: 'translate(-50%, -50%) scale(0.5) rotate(0deg)', opacity: 0 }
+    ], { duration: 1200, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+    
+    setTimeout(() => { el.remove(); triggerHudPop('panel-combo'); }, 1100);
+}
+
+function explode(pos, color) {
+    const explodeMat = new THREE.MeshBasicMaterial({color: color});
     for(let i=0; i<20; i++){ 
         const p = new THREE.Mesh(globalBloodGeo, explodeMat); 
         p.position.copy(pos); p.position.y+=1.5; 
@@ -606,7 +818,16 @@ function explode(pos, hexColor) {
     }
 }
 
-function spawnFloatingDamage(pos3D, textStr, isHeadshot) {
+function spawnCameraBloodSplash() {
+    for(let i=0; i<40; i++) {
+        const p = new THREE.Mesh(new THREE.BoxGeometry(0.25,0.25,0.25), new THREE.MeshBasicMaterial({color: 0xff0000}));
+        const dir = new THREE.Vector3((Math.random()-0.5)*2.5, (Math.random()-0.5)*2.5, -Math.random()*2 - 0.5).normalize();
+        dir.applyQuaternion(camera.quaternion); p.position.copy(camera.position).addScaledVector(dir, 1.0 + Math.random());
+        p.userData = { v: dir.multiplyScalar(25 + Math.random()*25), life: 0.6 }; scene.add(p); particles.push(p);
+    }
+}
+
+function spawnFloatingDamage(pos3D, textStr, isCrit) {
     const vec = pos3D.clone(); vec.y += 2.5; vec.project(camera); if(vec.z > 1) return;
     const x = (vec.x * 0.5 + 0.5) * window.innerWidth, y = (vec.y * -0.5 + 0.5) * window.innerHeight;
     const el = document.createElement('div'); el.className = 'dmg-text'; el.style.left = x + 'px'; el.style.top = y + 'px';
@@ -614,7 +835,7 @@ function spawnFloatingDamage(pos3D, textStr, isHeadshot) {
     if(document.body.classList.contains('manga-active')) {
         el.style.color = '#ff0000'; el.style.fontSize = '4.5rem';
         el.style.textShadow = '0 0 20px #ff0000, -2px -2px 0 #fff, 2px 2px 0 #fff, 0 4px 10px black'; 
-    } else if(isHeadshot) { 
+    } else if(isCrit) { 
         el.style.color = '#ffdd00'; el.style.fontSize = '3.5rem'; el.style.textShadow = '0 0 25px red, 0 2px 5px black'; 
     } else { 
         el.style.fontSize = '2.2rem'; 
@@ -671,40 +892,94 @@ function resolveCol(pos, r) {
     }
 }
 
+// CORREZIONE DASH: Esplosivo, si consuma tutto subito e fa effetti
 function doDash() {
-    if(!gameActive || dashCooldown > 0) return;
-    isDashing = true; dashCooldown = 3; playSfx('dash');
+    if(!gameActive || stamina < 100) return; // Si attiva SOLO se al massimo 100%
+    
+    stamina = 0; 
+    isDashing = true; 
+    playSfx('dash');
+    
     document.getElementById('game-view').classList.add('dashing');
-    let fovOrigin = camera.fov, step = 0;
+    triggerHudPop('panel-hp'); // Fa pulsare la parte sinistra dell'UI
+    
+    let fovOrigin = camera.fov; 
+    let step = 0;
+    
     const dashInterval = setInterval(() => {
-        step++; camera.fov = fovOrigin + Math.sin(step*0.2)*45; camera.updateProjectionMatrix(); if(droneOsc) droneOsc.frequency.value = 60 + Math.sin(step*0.2)*150;
-        if(step > 15) { clearInterval(dashInterval); isDashing = false; camera.fov = fovOrigin; camera.updateProjectionMatrix(); if(droneOsc) droneOsc.frequency.value=60; document.getElementById('game-view').classList.remove('dashing'); }
+        step++; 
+        camera.fov = fovOrigin + Math.sin(step*0.2)*45; 
+        camera.updateProjectionMatrix(); 
+        if(droneOsc && audioCtx.state === 'running') droneOsc.frequency.value = 60 + Math.sin(step*0.2)*200;
+        
+        if(step > 15) { 
+            clearInterval(dashInterval); 
+            isDashing = false; 
+            camera.fov = fovOrigin; 
+            camera.updateProjectionMatrix(); 
+            if(droneOsc && audioCtx.state === 'running') droneOsc.frequency.value=60; 
+            document.getElementById('game-view').classList.remove('dashing'); 
+        }
     }, 16);
 }
 
-function fire() {
-    if(!gameActive || ammo <= 0) return;
-    ammo--; updateAmmoUI(); playSfx('shoot');
-    const xh = document.getElementById('xhair'); xh.classList.add('firing'); setTimeout(()=>xh.classList.remove('firing'), 100);
-    camRot.pitch += 0.015; document.getElementById('game-view').classList.add('shake'); setTimeout(()=>document.getElementById('game-view').classList.remove('shake'), 100);
-    
+function spawnProjAt(pos, velocityOffset) {
     const m = new THREE.Mesh(globalProjGeo, globalProjMat);
-    const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion); m.position.copy(camera.position).addScaledVector(dir, 2.5); m.userData = { vel: dir.multiplyScalar(280), life: 1.5 };
+    const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion).add(velocityOffset).normalize();
+    m.position.copy(pos).addScaledVector(dir, 2.5);
+    m.userData = { vel: dir.multiplyScalar(280), life: 1.5 };
     scene.add(m); projectiles.push(m);
 }
 
+function fire() {
+    if(!gameActive || ammo <= 0 || isReloading) return;
+    ammo--; updateAmmoUI(); playSfx('shoot');
+    triggerHudPop('ammo-panel-parent');
+    const xh = document.getElementById('xhair'); xh.classList.add('firing'); setTimeout(()=>xh.classList.remove('firing'), 100);
+    camRot.pitch += 0.015; document.getElementById('game-view').classList.add('shake'); setTimeout(()=>document.getElementById('game-view').classList.remove('shake'), 100);
+    
+    if(currentLevel >= 5) {
+        spawnProjAt(camera.position, new THREE.Vector3(0, 0, 0));
+        spawnProjAt(camera.position, new THREE.Vector3(-0.15, 0, 0));
+        spawnProjAt(camera.position, new THREE.Vector3(0.15, 0, 0));
+    } else if(currentLevel >= 3) {
+        spawnProjAt(camera.position, new THREE.Vector3(-0.08, 0, 0));
+        spawnProjAt(camera.position, new THREE.Vector3(0.08, 0, 0));
+    } else {
+        spawnProjAt(camera.position, new THREE.Vector3(0, 0, 0));
+    }
+}
+
+function doManualReload() {
+    if(!gameActive || isReloading || ammo === 12) return;
+    isReloading = true; reloadTimer = 0;
+    playSfx('dash'); 
+    const ind = document.getElementById('reload-indicator');
+    if(ind) {
+        ind.classList.remove('hidden');
+        ind.style.transform = 'translate(-50%, -50%) scale(1.1)';
+        ind.style.opacity = '0';
+        setTimeout(() => { ind.style.transform = 'translate(-50%, -50%) scale(1)'; ind.style.opacity = '1'; }, 10);
+    }
+}
+
 function takeDamage(enemyPos) {
-    if(iFrames > 0 || !gameActive) return; hp--; iFrames = 1.5; currentCombo = 0; playSfx('dmg');
+    if(iFrames > 0 || !gameActive) return; hp--; iFrames = 1.5; currentCombo = 0; updateComboUI(); playSfx('dmg');
+    triggerHudPop('panel-hp');
     const fl = document.getElementById('dmg-screen'); fl.style.opacity = '1'; setTimeout(() => fl.style.opacity = '0', 200);
     const hps = document.getElementById('hp-container').children; for(let i=0; i<3; i++) hps[i].className = i < hp ? 'fa-solid fa-heart' : 'fa-solid fa-heart opacity-20 text-gray-700';
     
-    document.getElementById('game-view').classList.add('shake-heavy'); document.getElementById('game-view').classList.add('stunned');
-    setTimeout(()=> { document.getElementById('game-view').classList.remove('shake-heavy'); document.getElementById('game-view').classList.remove('stunned'); }, 400);
+    document.body.classList.add('brutal-shaking'); 
+    document.getElementById('game-view').classList.add('stunned');
+    setTimeout(()=> { document.body.classList.remove('brutal-shaking'); document.getElementById('game-view').classList.remove('stunned'); }, 400);
 
     camera.fov = 135; 
     if(enemyPos) { stunTimer = 0.4; const kbDir = new THREE.Vector3().subVectors(camera.position, enemyPos).normalize(); kbDir.y = 0.6; playerVelocity.copy(kbDir).multiplyScalar(180); }
     if(hp <= 0) gameOver();
 }
+
+function updateAmmoUI() { const box = document.getElementById('ammo-clip'); box.innerHTML = ''; for(let i=0; i<12; i++) { const d = document.createElement('i'); d.className = 'fa-solid fa-droplet transition-all duration-200'; if(i < ammo) { d.style.color = currentTheme.css; d.style.transform = 'scale(1)'; d.style.filter = `drop-shadow(0 0 5px ${currentTheme.css})`; } else { d.style.color = 'rgba(255,255,255,0.1)'; d.style.transform = 'scale(0.8)'; d.style.filter = 'none'; } box.appendChild(d); } }
+function updateRadar() { const rd = document.getElementById('radar-dots'); rd.innerHTML = ''; const isMob = window.innerWidth < 640; const radSc = isMob ? 42/100 : 56/100; enemies.forEach(e => { let dx = e.position.x - camera.position.x, dz = e.position.z - camera.position.z, a = -camRot.yaw, rx = dx*Math.cos(a) - dz*Math.sin(a), rz = dx*Math.sin(a) + dz*Math.cos(a); if(rx*rx+rz*rz < 10000) { const d = document.createElement('div'); d.className = 'absolute w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_red]'; d.style.left = `calc(50% + ${rx*radSc}px)`; d.style.top = `calc(50% + ${rz*radSc}px)`; d.style.transform = 'translate(-50%,-50%)'; rd.appendChild(d); } }); }
 
 // ==========================================
 // LOOP PRINCIPALE
@@ -714,15 +989,82 @@ function renderLoop() {
     
     let rawDt = clock ? clock.getDelta() : 0;
     let dt = Math.min(rawDt, 0.05);
-    if(hitStopTimer > 0) { hitStopTimer -= rawDt; dt *= 0.05; }
+    if(hitStopTimer > 0) { hitStopTimer -= rawDt; dt *= 0.05; } 
 
     if(!gameActive) { camRot.yaw += 0.002; camera.quaternion.setFromEuler(new THREE.Euler(0, camRot.yaw, 0, 'YXZ')); camera.position.set(0, 30, 0); renderer.render(scene, camera); return; }
 
     if(iFrames > 0) iFrames -= dt;
-    if(dashCooldown > 0) { dashCooldown -= dt; document.getElementById('dash-fill').style.width = (100 - (dashCooldown/3)*100) + '%'; document.getElementById('dash-status').innerText = 'RECHARGING'; document.getElementById('dash-status').className = 'text-red-400'; } 
-    else { document.getElementById('dash-fill').style.width = '100%'; document.getElementById('dash-status').innerText = 'READY'; document.getElementById('dash-status').className = 'text-green-400 font-bold'; }
+    
+    // SISTEMA BOOST DELLA BARRA SHIFT (Ricarica e UI)
+    const boostBar = document.getElementById('dash-fill');
+    if (stamina < 100) {
+        stamina += 0.5; // Ricarica fluida circa 3.5 secondi completi
+        if(stamina > 100) stamina = 100;
+    }
+    
+    if(boostBar) { 
+        boostBar.style.width = stamina + '%'; 
+        if (stamina < 100) { 
+            boostBar.style.backgroundColor = '#ef4444'; 
+            boostBar.style.boxShadow = '0 0 10px #ef4444';
+            document.getElementById('dash-status').innerText = 'CHARGING...';
+            document.getElementById('dash-status').className = 'text-red-500 animate-pulse font-bold';
+        } else { 
+            boostBar.style.backgroundColor = currentTheme.css; 
+            boostBar.style.boxShadow = `0 0 10px ${currentTheme.css}`;
+            document.getElementById('dash-status').innerText = 'READY [SHIFT]';
+            document.getElementById('dash-status').className = 'text-green-400 font-bold';
+        } 
+    }
 
-    if (ammo < 12) { ammoTimer += dt; if(ammoTimer >= 1.5) { ammo++; updateAmmoUI(); ammoTimer = 0; } }
+    if (ammo < 12 && !isReloading) { ammoTimer += dt; if(ammoTimer >= 1.5) { ammo++; updateAmmoUI(); ammoTimer = 0; } }
+
+    if(isReloading) {
+        reloadTimer += dt;
+        const pct = Math.min(100, (reloadTimer / RELOAD_TIME) * 100);
+        const fill = document.getElementById('reload-fill');
+        if(fill) {
+            fill.style.width = pct + '%';
+            const glowRadius = THREE.MathUtils.lerp(10, 25, reloadTimer / RELOAD_TIME);
+            fill.style.boxShadow = `0 0 ${glowRadius}px var(--theme), 0 0 ${glowRadius/2}px white`;
+        }
+        
+        if(reloadTimer >= RELOAD_TIME) {
+            ammo = 12; updateAmmoUI(); isReloading = false;
+            
+            const xhairElement = document.getElementById('xhair');
+            xhairElement.style.transition = 'transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            xhairElement.style.transform = 'translate(-50%, -50%) scale(1.4)';
+            setTimeout(() => { xhairElement.style.transform = 'translate(-50%, -50%) scale(1)'; setTimeout(()=>xhairElement.style.transition='all 0.1s', 100); }, 100);
+            
+            triggerHudPop('ammo-panel-parent');
+
+            const ind = document.getElementById('reload-indicator');
+            if(ind) {
+                ind.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                ind.style.opacity = '0';
+                setTimeout(() => ind.classList.add('hidden'), 150);
+            }
+            playSfx('click');
+        }
+    }
+
+    for(let i = ammoPickups.length - 1; i >= 0; i--) {
+        const p = ammoPickups[i];
+        p.rotation.y += p.userData.rotSpeed * dt;
+        p.rotation.x += 0.6 * dt;
+        p.position.y = p.userData.baseY + Math.sin(clock.elapsedTime * 4 + i) * 0.3; 
+        
+        if(camera.position.distanceTo(p.position) < 3.2) {
+            ammo = 12; updateAmmoUI(); playSfx('hit');
+            triggerHudPop('ammo-panel-parent');
+            if(isReloading) { isReloading = false; const ind = document.getElementById('reload-indicator'); if(ind) ind.classList.add('hidden'); }
+            spawnFloatingDamage(p.position, "SERBATOIO PIENO +12", true);
+            scene.remove(p); ammoPickups.splice(i, 1);
+            
+            setTimeout(() => { if(gameActive) spawnAmmoPickup((Math.random()-0.5)*ARENA*1.6, (Math.random()-0.5)*ARENA*1.6); }, 6000);
+        }
+    }
 
     let targetRoll = 0; if(keys.a) targetRoll = 0.08; else if(keys.d) targetRoll = -0.08; camRot.roll += (targetRoll - camRot.roll) * 10 * dt;
     camera.fov += (85 - camera.fov) * 5 * dt; camera.updateProjectionMatrix();
@@ -736,7 +1078,10 @@ function renderLoop() {
     if(mv.lengthSq() > 0) mv.normalize();
     if(stunTimer > 0) { stunTimer -= dt; mv.multiplyScalar(0.05); }
 
-    let speed = isDashing ? 140 : 50; camera.position.addScaledVector(mv, speed * dt);
+    // SE STAI SPRINTANDO VAI A VELOCITÁ LUCE, ALTRIMENTI VELOCITÀ NORMALE
+    let speed = isDashing ? 180 : 50; 
+    camera.position.addScaledVector(mv, speed * dt);
+    
     playerVelocity.multiplyScalar(0.90); camera.position.addScaledVector(playerVelocity, dt);
     camera.position.y += Math.sin(clock.elapsedTime * 45) * 0.06;
     
@@ -812,14 +1157,30 @@ function renderLoop() {
 
                 if(e.userData.hp <= 0) {
                     playSfx('manga-slash'); spawnMangaBlood(e.position);
-                    document.body.classList.add('manga-active'); setTimeout(()=>document.body.classList.remove('manga-active'), 350); 
+                    
+                    document.body.classList.add('brutal-shaking');
+                    document.body.classList.add('manga-active'); 
+                    setTimeout(() => {
+                        document.body.classList.remove('brutal-shaking');
+                        document.body.classList.remove('manga-active'); 
+                    }, 350); 
+
                     hitStopTimer = 0.25; 
                     explode(e.position, currentTheme.hex); scene.remove(e); enemies.splice(j,1);
+                    
                     currentCombo++; maxCombo = Math.max(maxCombo, currentCombo);
+                    updateComboUI();
                     
                     let pts = (100 * currentCombo) + (isHeadshot ? 50 : 0); 
-                    score += pts; document.getElementById('hud-score').innerText = score;
+                    score += pts; 
+                    document.getElementById('hud-score').innerText = score;
+                    triggerHudPop('panel-score'); 
+                    
                     spawnFloatingDamage(e.position, isHeadshot ? `HEADSHOT! +${pts}` : `+${pts}`, true);
+                    
+                    addXp(120 * currentCombo);
+                    spawnComboParticle(e.position, currentCombo);
+
                     ammo = Math.min(12, ammo + 3); updateAmmoUI();
                 } else { playSfx(isHeadshot ? 'headshot' : 'hit'); spawnFloatingDamage(e.position, isHeadshot ? 'HEADSHOT' : 'HIT', isHeadshot); }
                 hit = true; break;
@@ -833,26 +1194,36 @@ function renderLoop() {
 }
 
 // ==========================================
-// AVVIO E GESTIONE
+// AVVIO E GESTIONE GIOCO
 // ==========================================
 function startMission() {
     initAudio(); playSfx('click'); startDrone();
     document.getElementById('lobby').style.opacity = '0';
     setTimeout(() => { document.getElementById('lobby').classList.add('hidden'); document.getElementById('hud').classList.remove('hidden'); document.getElementById('xhair').classList.remove('hidden'); if(window.innerWidth < 768) document.getElementById('mob-ctrl').classList.remove('hidden'); }, 500);
     
-    score = 0; timeLeft = 60; hp = 3; ammo = 12; currentCombo = 0; maxCombo = 0; dashCooldown = 0; ammoTimer = 0; playerVelocity.set(0,0,0); stunTimer = 0;
-    document.getElementById('hud-score').innerText = '0'; document.getElementById('hud-time').innerText = '60'; updateAmmoUI();
+    score = 0; timeLeft = 60; hp = 3; ammo = 12; currentCombo = 0; maxCombo = 0; dashCooldown = 0; ammoTimer = 0; playerVelocity.set(0,0,0); stunTimer = 0; stamina = 100; isReloading = false;
+    currentLevel = 1; currentXp = 0; nextLevelXp = 1000;
+    
+    document.getElementById('hud-level-name').innerText = LEVEL_NAMES[1];
+    document.getElementById('xp-bar').style.width = '0%';
+    document.getElementById('hud-score').innerText = '0'; document.getElementById('hud-time').innerText = '60'; updateAmmoUI(); updateComboUI();
+    document.getElementById('reload-indicator').classList.add('hidden');
     const hps = document.getElementById('hp-container').children; for(let i=0; i<3; i++) hps[i].className = 'fa-solid fa-heart';
 
     camera.position.set(0, 10, 40); camRot.yaw = 0; camRot.pitch = 0; camRot.roll = 0; camera.fov = 85; camera.updateProjectionMatrix();
     
     projectiles.forEach(p=>scene.remove(p)); projectiles.length=0; particles.forEach(p=>scene.remove(p)); particles.length=0; enemies.forEach(e=>scene.remove(e)); enemies.length=0;
+    
+    ammoPickups.forEach(p => scene.remove(p)); ammoPickups.length = 0;
+    for(let i=0; i<7; i++) { spawnAmmoPickup((Math.random()-0.5)*ARENA*1.6, (Math.random()-0.5)*ARENA*1.6); }
+
     for(let i=0; i<5; i++) spawnEnemy();
 
     gameActive = true; clock.start();
     if(gameTimer) clearInterval(gameTimer);
     gameTimer = setInterval(() => {
         timeLeft--; const timeEl = document.getElementById('hud-time'); timeEl.innerText = timeLeft;
+        triggerHudPop('panel-time');
         if(timeLeft <= 10) { timeEl.classList.add('text-red-500', 'animate-pulse'); playSfx('hover'); } else timeEl.classList.remove('text-red-500', 'animate-pulse');
         if(timeLeft <= 0) gameOver();
     }, 1000);
@@ -863,9 +1234,14 @@ function startMission() {
 async function gameOver() {
     gameActive = false; clearInterval(gameTimer); stopDrone(); if(document.exitPointerLock) document.exitPointerLock();
     document.getElementById('hud').classList.add('hidden'); document.getElementById('xhair').classList.add('hidden'); document.getElementById('mob-ctrl').classList.add('hidden'); document.getElementById('altitude-warning').style.opacity = '0';
+    document.getElementById('reload-indicator').classList.add('hidden');
     document.getElementById('go-score').innerText = score; document.getElementById('go-combo').innerText = maxCombo;
     
-    speedLines.forEach(l => l.visible = false); const recAlert = document.getElementById('new-record-alert'); recAlert.classList.add('hidden'); document.getElementById('gameover').classList.remove('hidden');
+    speedLines.forEach(l => l.visible = false);
+    ammoPickups.forEach(p => scene.remove(p)); ammoPickups.length = 0;
+    const recAlert = document.getElementById('new-record-alert');
+    recAlert.classList.add('hidden');
+    document.getElementById('gameover').classList.remove('hidden');
 
     const isNewRecord = await checkAndSaveScore(score);
     if(isNewRecord) { recAlert.classList.remove('hidden'); playSfx('record'); }
@@ -880,29 +1256,54 @@ document.addEventListener('mousemove', e => {
         let mx = e.movementX || 0; let my = e.movementY || 0;
         if(mx > 150) mx = 150; if(mx < -150) mx = -150; 
         if(my > 150) my = 150; if(my < -150) my = -150;
-        camRot.yaw -= mx * 0.0022; camRot.pitch = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, camRot.pitch - my * 0.0022)); 
+        camRot.yaw -= mx * 0.0022; 
+        camRot.pitch = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, camRot.pitch - my * 0.0022)); 
     } 
 });
 
+// EVENTO TASTO SHIFT E RICARICA FISSATI PERFETTAMENTE
 document.addEventListener('mousedown', e => { if(document.pointerLockElement === document.body && e.button===0) fire(); });
-window.addEventListener('keydown', e => { const k = e.key.toLowerCase(); if(k==='w') keys.w=1; if(k==='s') keys.s=1; if(k==='a') keys.a=1; if(k==='d') keys.d=1; if(e.key===' ') keys.space=1; if(e.key==='Shift') { if(!keys.shift) doDash(); keys.shift=1; } });
-window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if(k==='w') keys.w=0; if(k==='s') keys.s=0; if(k==='a') keys.a=0; if(k==='d') keys.d=0; if(e.key===' ') keys.space=0; if(e.key==='Shift') keys.shift=0; });
+
+window.addEventListener('keydown', e => { 
+    const k = e.key.toLowerCase(); 
+    if(k==='w') keys.w=1; 
+    if(k==='s') keys.s=1; 
+    if(k==='a') keys.a=1; 
+    if(k==='d') keys.d=1; 
+    if(e.key===' ') keys.space=1; 
+    if(k==='r') doManualReload(); 
+    if(e.key==='Shift') { 
+        if(!keys.shift) doDash(); // Lancia il Boost ESPLOSIVO se si preme shift
+        keys.shift=1; 
+    } 
+});
+
+window.addEventListener('keyup', e => { 
+    const k = e.key.toLowerCase(); 
+    if(k==='w') keys.w=0; 
+    if(k==='s') keys.s=0; 
+    if(k==='a') keys.a=0; 
+    if(k==='d') keys.d=0; 
+    if(e.key===' ') keys.space=0; 
+    if(e.key==='Shift') keys.shift=0; 
+});
 
 const joyBase = document.getElementById('joy-base'), joyKnob = document.getElementById('joy-knob');
 joyBase.addEventListener('touchstart', e => { e.preventDefault(); joyTouch = e.changedTouches[0].identifier; joyActive=true; const r = joyBase.getBoundingClientRect(); joyCenter = {x: r.left+r.width/2, y: r.top+r.height/2}; }, {passive:false});
 joyBase.addEventListener('touchmove', e => { e.preventDefault(); for(let t of e.changedTouches) { if(t.identifier === joyTouch) { let dx = t.clientX - joyCenter.x, dy = t.clientY - joyCenter.y; let dist = Math.sqrt(dx*dx+dy*dy), maxR = 40; if(dist > maxR) { dx=(dx/dist)*maxR; dy=(dy/dist)*maxR; } joyKnob.style.transform = `translate(${dx}px,${dy}px)`; joyDir.x = dx/maxR; joyDir.y = dy/maxR; } } }, {passive:false});
 joyBase.addEventListener('touchend', e => { for(let t of e.changedTouches) { if(t.identifier === joyTouch) { joyActive=false; joyKnob.style.transform='translate(0,0)'; joyDir={x:0,y:0}; } } });
 
-let lookTouchId = null; const lz = document.getElementById('look-zone');
+let lookTouchId = null;
+const lz = document.getElementById('look-zone');
 lz.addEventListener('touchstart', e => { e.preventDefault(); lookTouchId = e.changedTouches[0].identifier; lookLx = e.changedTouches[0].clientX; lookLy = e.changedTouches[0].clientY; }, {passive:false});
 lz.addEventListener('touchmove', e => { e.preventDefault(); for(let t of e.changedTouches) { if(t.identifier === lookTouchId) { camRot.yaw -= (t.clientX - lookLx) * 0.005; camRot.pitch = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, camRot.pitch - (t.clientY - lookLy) * 0.005)); lookLx = t.clientX; lookLy = t.clientY; } } }, {passive:false});
 lz.addEventListener('touchend', e => { for(let t of e.changedTouches) { if(t.identifier===lookTouchId) lookTouchId=null; } });
 
-document.getElementById('m-fire').addEventListener('touchstart', e => { e.preventDefault(); fire(); }, {passive:false}); document.getElementById('m-dash').addEventListener('touchstart', e => { e.preventDefault(); doDash(); }, {passive:false});
+document.getElementById('m-fire').addEventListener('touchstart', e => { e.preventDefault(); fire(); }, {passive:false});
+document.getElementById('m-reload').addEventListener('touchstart', e => { e.preventDefault(); doManualReload(); }, {passive:false});
+document.getElementById('m-dash').addEventListener('touchstart', e => { e.preventDefault(); doDash(); }, {passive:false}); // Scatto esplosivo trigger da mobile
 
 window.onload = init3D;
 </script>
 </body>
 </html>
-
-```
