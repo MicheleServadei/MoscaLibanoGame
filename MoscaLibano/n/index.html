@@ -410,7 +410,7 @@ const FB = {
 if(!firebase.apps.length) firebase.initializeApp(FB);
 const auth = firebase.auth(), db = firebase.firestore();
 
-let ME = { nick: '', uid: null, guest: false, highScore: 0 };
+let ME = { nick: '', uid: null, guest: false, bestScore: 0 };
 const ui_loading = document.getElementById('ui-loading'), ui_loginBox = document.getElementById('ui-login-box'), ui_nickBox = document.getElementById('ui-nick-box'), ui_playBox = document.getElementById('ui-play-box');
 
 function showUI(box) { [ui_loading, ui_loginBox, ui_nickBox, ui_playBox].forEach(b => b.classList.add('hidden')); box.classList.remove('hidden'); }
@@ -419,7 +419,7 @@ async function fetchLeaderboard() {
     const lbContainer = document.getElementById('leaderboard-container');
     lbContainer.innerHTML = '<div class="flex justify-center items-center h-full text-[var(--theme)]"><i class="fa-solid fa-circle-notch fa-spin text-3xl drop-shadow-[0_0_10px_currentColor]"></i></div>';
     try {
-        const snap = await db.collection('flystrike_users').orderBy('highScore', 'desc').limit(15).get();
+        const snap = await db.collection('players').orderBy('bestScore', 'desc').limit(15).get();
         if(snap.empty) { lbContainer.innerHTML = '<div class="text-center text-gray-500 font-bold uppercase tracking-widest mt-6">Nessun punteggio registrato.</div>'; return; }
         
         let html = '<table class="w-full text-left text-sm"><thead class="text-[10px] text-yellow-500 font-black uppercase tracking-widest border-b border-white/10"><tr><th class="p-3">Rank</th><th class="p-3">Pilota</th><th class="p-3 text-right">Score</th></tr></thead><tbody>';
@@ -428,7 +428,7 @@ async function fetchLeaderboard() {
             const data = doc.data();
             let rankStyle = rank === 1 ? 'text-yellow-400 text-xl drop-shadow-[0_0_8px_yellow]' : rank === 2 ? 'text-gray-300 text-lg' : rank === 3 ? 'text-orange-400 text-lg' : 'text-gray-500';
             let isMe = (data.nickname === ME.nick) ? 'bg-[var(--theme)]/20 border-l-4 border-[var(--theme)]' : 'border-b border-white/5 hover:bg-white/5 transition';
-            html += `<tr class="${isMe}"><td class="p-3 font-bold cyber-font ${rankStyle}">#${rank}</td><td class="p-3 font-black tracking-widest uppercase text-white">${data.nickname || 'IGNOTO'}</td><td class="p-3 text-right cyber-font text-[var(--theme)] text-lg">${data.highScore || 0}</td></tr>`;
+            html += `<tr class="${isMe}"><td class="p-3 font-bold cyber-font ${rankStyle}">#${rank}</td><td class="p-3 font-black tracking-widest uppercase text-white">${data.nickname || 'IGNOTO'}</td><td class="p-3 text-right cyber-font text-[var(--theme)] text-lg">${data.bestScore || 0}</td></tr>`;
             rank++;
         });
         html += '</tbody></table>';
@@ -440,12 +440,12 @@ document.getElementById('btn-refresh-lb').onclick = fetchLeaderboard;
 async function checkAndSaveScore(finalScore) {
     if(ME.guest || finalScore <= 0) return false;
     try {
-        const docRef = db.collection('flystrike_users').doc(ME.uid);
+        const docRef = db.collection('players').doc(ME.uid);
         const doc = await docRef.get();
-        let currentHigh = doc.exists ? (doc.data().highScore || 0) : 0;
+        let currentHigh = doc.exists ? (doc.data().bestScore || 0) : 0;
         if(finalScore > currentHigh) {
-            await docRef.set({ highScore: finalScore, nickname: ME.nick }, { merge: true });
-            ME.highScore = finalScore; document.getElementById('lobby-highscore').innerText = ME.highScore;
+            await docRef.set({ bestScore: finalScore, nickname: ME.nick }, { merge: true });
+            ME.bestScore = finalScore; document.getElementById('lobby-highscore').innerText = ME.bestScore;
             fetchLeaderboard(); return true;
         }
     } catch(e) { console.error("Score locale", e); }
@@ -456,11 +456,11 @@ auth.onAuthStateChanged(async user => {
     if (user) {
         ME.uid = user.uid; ME.guest = false;
         try {
-            const doc = await db.collection('flystrike_users').doc(user.uid).get();
+            const doc = await db.collection('players').doc(user.uid).get();
             if (doc.exists && doc.data().nickname) {
-                ME.nick = doc.data().nickname; ME.highScore = doc.data().highScore || 0;
+                ME.nick = doc.data().nickname; ME.bestScore = doc.data().bestScore || 0;
                 document.getElementById('welcome-text').innerHTML = `BENTORNATO, <span class="text-[var(--theme)]">${ME.nick}</span>`;
-                document.getElementById('lobby-highscore').innerText = ME.highScore; showUI(ui_playBox);
+                document.getElementById('lobby-highscore').innerText = ME.bestScore; showUI(ui_playBox);
             } else { showUI(ui_nickBox); }
         } catch(e) { 
             ME.nick = user.displayName ? user.displayName.split(' ')[0].toUpperCase() : 'PILOT_X';
@@ -475,10 +475,10 @@ document.getElementById('btn-save-nick').onclick = async () => {
     const n = document.getElementById('inp-nick').value.trim().toUpperCase();
     if(n.length < 3) return alert("Inserisci almeno 3 caratteri!");
     showUI(ui_loading);
-    try { await db.collection('flystrike_users').doc(ME.uid).set({ nickname: n, highScore: 0 }, { merge: true }); ME.nick = n; ME.highScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-[var(--theme)]">${ME.nick}</span>`; showUI(ui_playBox); fetchLeaderboard(); } 
+    try { await db.collection('players').doc(ME.uid).set({ nickname: n, bestScore: 0 }, { merge: true }); ME.nick = n; ME.bestScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-[var(--theme)]">${ME.nick}</span>`; showUI(ui_playBox); fetchLeaderboard(); } 
     catch(e) { ME.nick = n; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-[var(--theme)]">${ME.nick}</span>`; showUI(ui_playBox); }
 };
-document.getElementById('btn-guest').onclick = () => { ME.guest = true; ME.uid = null; ME.nick = 'OSPITE_' + Math.floor(Math.random()*999); ME.highScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-gray-400">${ME.nick}</span>`; document.getElementById('lobby-highscore').innerText = "0 (Ospite)"; showUI(ui_playBox); fetchLeaderboard(); };
+document.getElementById('btn-guest').onclick = () => { ME.guest = true; ME.uid = null; ME.nick = 'OSPITE_' + Math.floor(Math.random()*999); ME.bestScore = 0; document.getElementById('welcome-text').innerHTML = `PILOTA: <span class="text-gray-400">${ME.nick}</span>`; document.getElementById('lobby-highscore').innerText = "0 (Ospite)"; showUI(ui_playBox); fetchLeaderboard(); };
 document.getElementById('btn-logout').onclick = () => { auth.signOut(); showUI(ui_loginBox); };
 
 // ==========================================
