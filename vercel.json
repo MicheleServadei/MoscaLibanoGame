@@ -1,5 +1,5 @@
 {
-  "outputDirectory": "MoscaLibano",
+  "root": "MoscaLibano",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
