@@ -1,0 +1,6 @@
+{
+  "root": "MoscaLibano",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
