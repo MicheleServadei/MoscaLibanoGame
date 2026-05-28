@@ -1,4 +1,5 @@
 {
+  "outputDirectory": "MoscaLibano",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
