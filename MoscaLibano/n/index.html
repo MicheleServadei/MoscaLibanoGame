@@ -134,7 +134,223 @@
         @keyframes blink { 0% {opacity: 1;} 100% {opacity: 0.2;} }
         
         .hex-clip { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
-    </style>
+        @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
+        @keyframes spin { 100%{transform:rotate(360deg)} }
+        @keyframes floatUp { 0%{opacity:0;transform:translateY(0) scale(.8)} 15%{opacity:1;transform:translateY(-20px) scale(1.1)} 80%{opacity:1;transform:translateY(-60px) scale(1)} 100%{opacity:0;transform:translateY(-90px) scale(.8)} }
+        @keyframes killBanner { 0%{opacity:0;transform:translate(-50%,-50%) scale(.3)} 10%{opacity:1;transform:translate(-50%,-50%) scale(1.2)} 20%{transform:translate(-50%,-50%) scale(1)} 80%{opacity:1} 100%{opacity:0;transform:translate(-50%,-60%) scale(.9)} }
+        @keyframes streakIn { 0%{opacity:0;left:110%} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0;left:-10%} }
+        @keyframes scoreCounter { 0%{transform:scale(1)} 50%{transform:scale(1.3);filter:brightness(2)} 100%{transform:scale(1)} }
+        /* HUD highlight flash */
+        @keyframes hpPulse { 0%{filter:brightness(1)} 50%{filter:brightness(2.5) saturate(3)} 100%{filter:brightness(1)} }
+        .hp-hit { animation: hpPulse 0.3s ease; }
+        /* Streak banner che attraversa lo schermo */
+        .streak-banner { position:fixed;top:35%;left:110%;transform:translateY(-50%);font-family:'Black Ops One',cursive;font-size:3.5rem;white-space:nowrap;pointer-events:none;z-index:90;animation:streakIn 1.8s cubic-bezier(.22,1,.36,1) forwards; }
+        /* Rank flash in classifica */
+        @keyframes rankFlash { 0%{background:rgba(255,220,0,0.3)} 100%{background:transparent} }
+        .rank-flash { animation:rankFlash 1s ease; }
+        /* Glow pulsante bottone play */
+        @keyframes playGlow { 0%,100%{box-shadow:0 0 25px var(--theme)} 50%{box-shadow:0 0 50px var(--theme),0 0 80px var(--theme)} }
+        #btn-play { animation: playGlow 2s infinite; }
+        /* Reticolo pulsante nei momenti critici */
+        @keyframes xhairCrit { 0%,100%{filter:drop-shadow(0 0 4px var(--theme))} 50%{filter:drop-shadow(0 0 20px #ff0000)} }
+        .xhair-low-hp { animation: xhairCrit 0.4s infinite; }
+        /* Numero score rimbalza */
+        #hud-score { transition: transform 0.05s; }
+        /* Filigrana radiale sfondo lobby */
+        #lobby::before { content:''; position:absolute; inset:0; background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(163,230,53,0.03) 1deg, transparent 2deg, transparent 30deg, rgba(163,230,53,0.03) 31deg, transparent 32deg); pointer-events:none; animation: spin 30s linear infinite; }
+    
+        /* ========================================== */
+        /* EFFETTO ANSIA - ULTIMI 10 SECONDI (CLIMAX) */
+        /* ========================================== */
+        @keyframes panicClimax {
+            0% { transform: translate(-50%, -50%) scale(var(--ansia-scale, 1)); color: #ff0000; text-shadow: 0 0 20px #ff0000; }
+            25% { transform: translate(calc(-50% - 5px), calc(-50% + 5px)) scale(calc(var(--ansia-scale, 1) * 1.1)) rotate(calc(var(--ansia-scale, 1) * -1deg)); color: #ff3300; text-shadow: 0 0 40px #ff0000; }
+            50% { transform: translate(calc(-50% + 5px), calc(-50% - 5px)) scale(var(--ansia-scale, 1)); color: #aa0000; text-shadow: 0 0 15px #aa0000; }
+            75% { transform: translate(calc(-50% - 5px), calc(-50% - 5px)) scale(calc(var(--ansia-scale, 1) * 1.2)) rotate(calc(var(--ansia-scale, 1) * 1deg)); color: #ff0000; text-shadow: 0 0 50px #ff0000; }
+            100% { transform: translate(-50%, -50%) scale(var(--ansia-scale, 1)); color: #ff0000; text-shadow: 0 0 20px #ff0000; }
+        }
+
+        .anxiety-timer-active {
+            animation: panicClimax var(--ansia-speed, 0.6s) infinite !important;
+            position: fixed !important; 
+            top: 50% !important;
+            left: 50% !important;
+            font-size: 6rem !important; 
+            z-index: 9999 !important;
+            pointer-events: none;
+            line-height: 1 !important;
+        }
+
+        @keyframes panicScreenFlash {
+            0% { background-color: rgba(255, 0, 0, var(--ansia-alpha, 0.1)); }
+            100% { background-color: transparent; }
+        }
+
+        .anxiety-screen-flash {
+            animation: panicScreenFlash var(--ansia-speed, 0.6s) infinite;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* ========================================== */
+        
+        /* ========================================== */
+        /* EXTREME BRUTAL COMBO SYSTEM (ULTRAKILL FX) */
+        /* ========================================== */
+        @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Kanit:ital,wght@1,900&display=swap');
+
+        /* OVERLAY SANGUE E PANICO SULLO SCHERMO */
+        #brutal-screen-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            box-shadow: inset 0 0 0px rgba(255, 0, 0, 0);
+            transition: box-shadow 0.1s ease-out;
+        }
+
+        #panel-combo {
+            position: fixed !important;
+            top: 25% !important;
+            right: 5% !important;
+            left: auto !important;
+            bottom: auto !important;
+            transform: skewX(-10deg) perspective(500px) rotateY(-15deg) !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            pointer-events: none !important;
+            z-index: 99999 !important;
+            opacity: 0;
+            transition: opacity 0.2s ease !important;
+        }
+
+        #panel-combo.brutal-active {
+            opacity: 1 !important;
+        }
+
+        .brutal-rank-letter {
+            font-family: 'Kanit', sans-serif !important;
+            font-weight: 900 !important;
+            font-style: italic !important;
+            font-size: 7rem !important; /* Ancora più gigante */
+            line-height: 0.75 !important;
+            letter-spacing: -3px;
+            text-transform: uppercase;
+            -webkit-text-stroke: 3px #000;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0px 10px 0px #000, 0px 20px 30px rgba(0,0,0,0.5);
+            margin-bottom: -10px;
+        }
+
+        .brutal-rank-word {
+            font-family: 'Russo One', sans-serif !important;
+            font-size: 1.5rem !important;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #fff;
+            -webkit-text-stroke: 1px #000;
+            text-shadow: 3px 3px 0px #000;
+            background: #000;
+            padding: 2px 10px;
+            transform: skewX(10deg);
+            margin-bottom: 5px;
+            border-bottom: 4px solid currentColor;
+        }
+
+        #hud-combo {
+            font-family: 'Kanit', sans-serif !important;
+            font-weight: 900 !important;
+            font-style: italic !important;
+            font-size: 5rem !important;
+            line-height: 0.8 !important;
+            color: #fff;
+            -webkit-text-stroke: 3px #000;
+            text-shadow: 5px 5px 0px #000;
+            margin-right: 10px;
+        }
+
+        .brutal-decay-container {
+            width: 220px;
+            height: 14px;
+            background: #000;
+            border: 3px solid #111;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.5);
+            transform: skewX(10deg);
+        }
+
+        .brutal-decay-bar {
+            height: 100%;
+            width: 100%;
+            background: #fff;
+            transform-origin: right;
+            transition: width 0.05s linear;
+        }
+
+        /* EFFETTI VISIVI IMPATTO */
+        @keyframes brutalHit {
+            0% { transform: scale(1.8) rotate(-10deg) translate(-20px, 10px); filter: brightness(3) contrast(2); }
+            20% { transform: scale(0.8) rotate(5deg) translate(10px, -5px); filter: brightness(1.5); }
+            50% { transform: scale(1.1) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); filter: brightness(1) contrast(1); }
+        }
+        .brutal-hit-active {
+            animation: brutalHit 0.3s cubic-bezier(0.1, 1, 0.3, 1) forwards !important;
+        }
+
+        /* SCREEN SHAKE EXTREME */
+        @keyframes extremeShake {
+            0% { transform: translate(10px, 10px) rotate(1deg); }
+            20% { transform: translate(-10px, -15px) rotate(-1deg); }
+            40% { transform: translate(15px, 5px) rotate(2deg); }
+            60% { transform: translate(-15px, 10px) rotate(-2deg); }
+            80% { transform: translate(10px, -10px) rotate(1deg); }
+            100% { transform: translate(0, 0) rotate(0); }
+        }
+        .shake-active {
+            animation: extremeShake 0.2s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* PARTICELLE SANGUE E SCINTILLE HTML */
+        .combo-particle {
+            position: absolute;
+            top: 50%; right: 50%;
+            width: 10px; height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            box-shadow: 0 0 10px currentColor;
+            animation: particleBlast 0.4s ease-out forwards;
+        }
+
+        @keyframes particleBlast {
+            0% { transform: translate(0, 0) scale(1.5); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* TIER COLORS */
+        .btier-d { color: #94a3b8; }
+        .btier-c { color: #38bdf8; text-shadow: 0 15px 0 #000, 0 0 20px #38bdf8; }
+        .btier-b { color: #fbbf24; text-shadow: 0 15px 0 #000, 0 0 30px #fbbf24; }
+        .btier-a { color: #f97316; text-shadow: 0 15px 0 #000, 0 0 40px #f97316; }
+        .btier-s { color: #ef4444; text-shadow: 0 15px 0 #000, 0 0 50px #ef4444; }
+        .btier-ss { color: #ec4899; text-shadow: 0 15px 0 #000, 0 0 60px #ec4899; }
+        .btier-sss { color: #a855f7; text-shadow: 0 15px 0 #000, 0 0 80px #a855f7; }
+        .btier-god { color: #a3e635; text-shadow: 0 15px 0 #000, 0 0 100px #a3e635; animation: godVibrate 0.05s infinite; }
+
+        @keyframes godVibrate {
+            0% { transform: translate(2px, -2px) scale(1.05); }
+            50% { transform: translate(-2px, 2px) scale(1.05); }
+            100% { transform: translate(2px, -2px) scale(1.05); }
+        }
+</style>
 </head>
 <body class="text-white">
 
@@ -244,98 +460,126 @@
     </div>
 
     <!-- LOBBY -->
-    <div id="lobby" class="absolute inset-0 z-40 flex items-center justify-center p-4 transition-opacity duration-500" style="background: radial-gradient(circle at center, rgba(163,230,53,0.15) 0%, rgba(0,0,0,0.85) 70%);">
-        <div class="glass-panel w-full max-w-5xl rounded-3xl overflow-hidden relative flex flex-col md:flex-row">
-            
-            <div class="p-8 md:p-14 text-center relative z-10 w-full md:w-[55%] border-b md:border-b-0 md:border-r border-white/10 bg-black/30">
-                <h2 class="text-xs tracking-[0.6em] text-yellow-500 font-black mb-3 uppercase drop-shadow-[0_0_5px_rgba(234,179,8,0.5)]">Operazione Acido</h2>
-                <h1 class="text-6xl md:text-7xl cyber-font neon-text animate-pulse-glow mb-8 tracking-wider">FLY STRIKE</h1>
-                
-                <div class="bg-black/60 p-4 rounded-2xl border border-[var(--theme)]/20 mb-8 inline-block backdrop-blur-md shadow-inner transition-colors duration-300">
-                    <p class="text-[10px] font-black text-gray-300 tracking-[0.2em] mb-3 uppercase">Seleziona Siero Mutageno</p>
-                    <div class="flex gap-4 justify-center">
-                        <div class="color-selector active bg-[#a3e635] text-[#a3e635]" data-hex="0xa3e635" data-css="#a3e635"></div>
-                        <div class="color-selector bg-[#00e5ff] text-[#00e5ff]" data-hex="0x00e5ff" data-css="#00e5ff"></div>
-                        <div class="color-selector bg-[#ff3366] text-[#ff3366]" data-hex="0xff3366" data-css="#ff3366"></div>
-                        <div class="color-selector bg-[#b700ff] text-[#b700ff]" data-hex="0xb700ff" data-css="#b700ff"></div>
+    <div id="lobby" class="absolute inset-0 z-40 flex items-center justify-center p-4 transition-opacity duration-500" style="background: radial-gradient(circle at 30% 50%, rgba(163,230,53,0.12) 0%, rgba(0,0,0,0.96) 60%), radial-gradient(circle at 70% 50%, rgba(255,50,50,0.08) 0%, transparent 50%);">
+        <!-- Particelle di sfondo -->
+        <canvas id="lobby-particles" style="position:absolute;inset:0;pointer-events:none;z-index:0;"></canvas>
+        <div class="glass-panel w-full max-w-5xl rounded-3xl overflow-hidden relative flex flex-col md:flex-row" style="z-index:1;">
+            <div class="p-8 md:p-12 text-center relative z-10 w-full md:w-[55%] border-b md:border-b-0 md:border-r border-white/10 bg-black/40">
+                <!-- Sottotitolo -->
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <div style="height:1px;width:40px;background:var(--theme);box-shadow:0 0 8px var(--theme);"></div>
+                    <span class="text-[10px] tracking-[0.8em] text-yellow-400 font-black uppercase">Operazione Acido · Lebanon</span>
+                    <div style="height:1px;width:40px;background:var(--theme);box-shadow:0 0 8px var(--theme);"></div>
+                </div>
+                <!-- Titolo principale -->
+                <h1 id="lobby-title" class="cyber-font neon-text animate-pulse-glow mb-1 tracking-wider" style="font-size:clamp(3.5rem,8vw,5.5rem);line-height:1;">FLY STRIKE</h1>
+                <p class="text-xs text-gray-500 font-bold tracking-widest uppercase mb-6">Golden Lebanon Edition</p>
+
+                <!-- Selezione siero -->
+                <div class="bg-black/70 p-4 rounded-2xl border mb-6 inline-block backdrop-blur-md transition-colors duration-300" style="border-color:var(--theme);box-shadow:0 0 20px color-mix(in srgb,var(--theme) 30%,transparent);">
+                    <p class="text-[9px] font-black text-gray-400 tracking-[0.25em] mb-3 uppercase">⚗ Siero Mutageno</p>
+                    <div class="flex gap-3 justify-center">
+                        <div class="color-selector active bg-[#a3e635]" data-hex="0xa3e635" data-css="#a3e635" title="Acido Tossico"></div>
+                        <div class="color-selector bg-[#00e5ff]" data-hex="0x00e5ff" data-css="#00e5ff" title="Criogeno"></div>
+                        <div class="color-selector bg-[#ff3366]" data-hex="0xff3366" data-css="#ff3366" title="Biologico"></div>
+                        <div class="color-selector bg-[#b700ff]" data-hex="0xb700ff" data-css="#b700ff" title="Psichico"></div>
                     </div>
                 </div>
 
-                <div class="max-w-sm mx-auto space-y-4 relative min-h-[160px]">
-                    <div id="ui-loading" class="absolute inset-0 flex items-center justify-center">
-                        <i class="fa-solid fa-circle-notch fa-spin text-4xl neon-text"></i>
+                <!-- Auth box -->
+                <div class="max-w-sm mx-auto space-y-3 relative min-h-[180px]">
+                    <div id="ui-loading" class="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                        <i class="fa-solid fa-biohazard fa-spin text-4xl neon-text" style="animation:spin 1s linear infinite;"></i>
+                        <span class="text-[10px] tracking-widest text-gray-400 uppercase">Connessione Sicura...</span>
                     </div>
-
-                    <div id="ui-login-box" class="hidden flex flex-col gap-4">
-                        <button id="btn-google" class="btn-ui w-full py-4 rounded-xl bg-white text-black font-black tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="w-6 h-6"> ACCEDI CON GOOGLE
+                    <div id="ui-login-box" class="hidden flex flex-col gap-3">
+                        <button id="btn-google" class="btn-ui w-full py-4 rounded-xl bg-white text-black font-black tracking-widest text-sm flex items-center justify-center gap-3">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="w-5 h-5"> Accedi con Google
                         </button>
-                        <button id="btn-guest" class="btn-ui w-full py-3 rounded-xl bg-black/60 border border-white/20 text-xs font-bold tracking-widest text-gray-300 hover:text-white">
-                            GIOCA COME OSPITE
-                        </button>
-                    </div>
-
-                    <div id="ui-nick-box" class="hidden flex flex-col gap-4">
-                        <p class="text-xs text-yellow-500 uppercase font-black tracking-widest">Identificazione Pilota</p>
-                        <input type="text" id="inp-nick" placeholder="NICKNAME" class="w-full bg-black/60 border-2 rounded-xl py-4 text-center text-xl cyber-font text-white focus:outline-none transition shadow-[0_0_20px_rgba(0,0,0,0.5)] uppercase" style="border-color: var(--theme)">
-                        <button id="btn-save-nick" class="btn-ui w-full py-4 rounded-xl font-black tracking-widest text-black text-sm" style="background: var(--theme)">
-                            CONFERMA E PROCEDI
+                        <div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:1px;background:rgba(255,255,255,0.1)"></div><span style="font-size:10px;color:#555;font-weight:bold;">oppure</span><div style="flex:1;height:1px;background:rgba(255,255,255,0.1)"></div></div>
+                        <button id="btn-guest" class="btn-ui w-full py-3 rounded-xl bg-black/60 border border-white/20 text-xs font-bold tracking-widest text-gray-400 hover:text-white">
+                            <i class="fa-solid fa-user-secret mr-2"></i>OSPITE ANONIMO
                         </button>
                     </div>
-
-                    <div id="ui-play-box" class="hidden flex flex-col gap-4">
-                        <div class="text-sm text-white font-black cyber-font tracking-widest bg-black/60 py-3 rounded-xl border border-white/10" id="welcome-text"></div>
-                        <div class="text-[11px] text-gray-300 font-bold uppercase tracking-widest">Record Personale: <span id="lobby-highscore" class="cyber-font text-base ml-2 neon-text">0</span></div>
-                        <button id="btn-play" class="btn-ui w-full py-5 rounded-xl cyber-font text-2xl font-bold tracking-widest text-black flex items-center justify-center gap-3 mt-2" style="background: var(--theme)">
-                            <i class="fa-solid fa-biohazard text-3xl"></i> DECOLLA
+                    <div id="ui-nick-box" class="hidden flex flex-col gap-3">
+                        <p class="text-[10px] text-yellow-400 uppercase font-black tracking-widest">☠ Scegli il tuo nome di battaglia</p>
+                        <input type="text" id="inp-nick" placeholder="INSERISCI NICKNAME" maxlength="16" class="w-full bg-black/80 border-2 rounded-xl py-4 text-center text-xl cyber-font text-white focus:outline-none uppercase" style="border-color:var(--theme);letter-spacing:3px;">
+                        <button id="btn-save-nick" class="btn-ui w-full py-4 rounded-xl font-black tracking-widest text-black text-sm" style="background:var(--theme)">
+                            <i class="fa-solid fa-check mr-2"></i>CONFERMA
                         </button>
-                        <button id="btn-logout" class="text-xs font-bold text-gray-400 hover:text-white transition mt-2 uppercase tracking-widest">Disconnetti</button>
+                    </div>
+                    <div id="ui-play-box" class="hidden flex flex-col gap-3">
+                        <div class="py-3 px-4 rounded-xl border border-white/10 bg-black/60" id="welcome-text" style="font-family:'Black Ops One',cursive;font-size:0.9rem;letter-spacing:2px;"></div>
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-[10px] text-gray-400 uppercase tracking-widest">Record</span>
+                            <span id="lobby-highscore" class="cyber-font text-lg neon-text">0</span>
+                        </div>
+                        <button id="btn-play" class="btn-ui w-full py-5 rounded-xl cyber-font text-2xl font-bold tracking-widest text-black flex items-center justify-center gap-3 mt-1 relative overflow-hidden" style="background:var(--theme);">
+                            <span style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.2) 50%,transparent 100%);animation:shimmer 2s infinite;"></span>
+                            <i class="fa-solid fa-biohazard text-2xl"></i> DECOLLA ORA
+                        </button>
+                        <button id="btn-logout" class="text-[10px] font-bold text-gray-600 hover:text-gray-300 transition uppercase tracking-widest">↩ Disconnetti</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Lato Destro: Classifica Globale -->
-            <div class="w-full md:w-[45%] p-6 md:p-10 flex flex-col bg-black/60 relative">
-                <div class="flex items-center justify-between mb-6 relative z-10">
-                    <h3 class="text-xl cyber-font tracking-widest text-white"><i class="fa-solid fa-globe mr-3 neon-text"></i> TOP MONDIALE</h3>
-                    <button id="btn-refresh-lb" class="text-gray-400 hover:text-white transition p-2 bg-white/5 rounded-lg"><i class="fa-solid fa-rotate-right"></i></button>
+            <!-- Classifica -->
+            <div class="w-full md:w-[45%] p-6 md:p-8 flex flex-col bg-black/60 relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg cyber-font tracking-widest text-white"><i class="fa-solid fa-skull-crossbones mr-2 neon-text"></i>TOP KILLER</h3>
+                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Classifica Mondiale · Live</p>
+                    </div>
+                    <button id="btn-refresh-lb" class="text-gray-500 hover:text-white p-2 bg-white/5 hover:bg-white/10 rounded-lg transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
                 </div>
-                
-                <div class="flex-1 bg-black/70 border border-white/10 rounded-2xl p-3 overflow-y-auto max-h-[350px] shadow-inner relative z-10" id="leaderboard-container">
-                    <div class="flex justify-center items-center h-full text-gray-500 text-sm font-bold tracking-widest uppercase">
-                        <i class="fa-solid fa-satellite-dish fa-fade mr-3 text-lg"></i> Sincronizzazione...
+                <div class="flex-1 bg-black/70 border border-white/10 rounded-2xl overflow-y-auto max-h-[380px] shadow-inner" id="leaderboard-container">
+                    <div class="flex flex-col justify-center items-center h-32 text-gray-500 text-xs font-bold tracking-widest uppercase gap-2">
+                        <i class="fa-solid fa-satellite-dish fa-fade text-xl"></i> Sincronizzazione...
                     </div>
                 </div>
+                <!-- Motivazione -->
+                <div id="lobby-taunt" class="mt-3 text-center text-[10px] text-gray-600 italic font-bold uppercase tracking-widest"></div>
             </div>
         </div>
     </div>
 
     <!-- GAMEOVER -->
-    <div id="gameover" class="absolute inset-0 z-50 bg-black/80 backdrop-blur-xl hidden flex flex-col items-center justify-center p-4">
-        <div class="glass-panel p-10 rounded-3xl border border-red-500 text-center max-w-lg w-full relative overflow-hidden shadow-[0_0_50px_rgba(255,0,0,0.4)]">
-            <h1 class="text-6xl cyber-font text-red-500 mb-3 drop-shadow-[0_0_25px_rgba(255,0,0,0.8)]">DISTRUTTO</h1>
-            <p class="text-yellow-500 font-bold uppercase tracking-widest text-xs mb-8">Missione Fallita</p>
+    <div id="gameover" class="absolute inset-0 z-50 hidden flex flex-col items-center justify-center p-4" style="background:radial-gradient(circle,rgba(255,0,0,0.15) 0%,rgba(0,0,0,0.95) 70%);">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,0,0,0.03) 3px,rgba(255,0,0,0.03) 4px);pointer-events:none;"></div>
+        <div class="glass-panel p-8 rounded-3xl text-center max-w-lg w-full relative overflow-hidden" style="border-color:#ff2222;box-shadow:0 0 60px rgba(255,0,0,0.4),0 0 120px rgba(255,0,0,0.15);">
+            <!-- Scanline -->
+            <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 98%,rgba(255,0,0,0.05) 100%);pointer-events:none;"></div>
             
-            <div id="new-record-alert" class="hidden text-3xl cyber-font text-rainbow mb-6 tracking-widest drop-shadow-[0_0_15px_white]">
-                <i class="fa-solid fa-trophy mr-3"></i> NUOVO RECORD!
+            <div id="go-death-msg" class="cyber-font mb-1" style="font-size:4.5rem;color:#ff1111;text-shadow:0 0 40px #ff0000,0 0 80px #ff000088;line-height:1;">DISTRUTTO</div>
+            <p class="text-xs text-red-400/60 font-bold uppercase tracking-[0.4em] mb-6">— Missione Fallita —</p>
+
+            <div id="new-record-alert" class="hidden cyber-font text-2xl text-rainbow mb-5 tracking-widest" style="text-shadow:0 0 20px white;">
+                <i class="fa-solid fa-crown mr-2"></i> NUOVO RECORD MONDIALE!
             </div>
 
-            <div class="grid grid-cols-2 gap-5 mb-10">
-                <div class="bg-black/60 p-5 rounded-2xl border border-white/10 relative">
-                    <div class="text-[10px] text-gray-400 font-black tracking-widest mb-2 uppercase">Score Totale</div>
-                    <div class="text-5xl cyber-font text-white" id="go-score">0</div>
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-black/80 p-4 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Score</div>
+                    <div class="text-3xl cyber-font text-white" id="go-score">0</div>
                 </div>
-                <div class="bg-black/60 p-5 rounded-2xl border border-white/10">
-                    <div class="text-[10px] text-gray-400 font-black tracking-widest mb-2 uppercase">Miglior Combo</div>
-                    <div class="text-5xl cyber-font text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]" id="go-combo">0</div>
+                <div class="bg-black/80 p-4 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Combo</div>
+                    <div class="text-3xl cyber-font text-yellow-400" id="go-combo">0</div>
+                </div>
+                <div class="bg-black/80 p-4 rounded-xl border border-white/10">
+                    <div class="text-[9px] text-gray-500 font-black uppercase tracking-widest mb-1">Livello</div>
+                    <div class="text-3xl cyber-font neon-text" id="go-level">1</div>
                 </div>
             </div>
 
-            <button id="btn-retry" class="btn-ui w-full py-5 rounded-xl cyber-font text-2xl font-bold tracking-widest text-black mb-4" style="background: var(--theme)">
-                <i class="fa-solid fa-rotate-right mr-3"></i> RIPROVA SUBITO
+            <div id="go-taunt" class="text-sm text-gray-500 italic mb-6 font-bold uppercase tracking-widest"></div>
+
+            <button id="btn-retry" class="btn-ui w-full py-5 rounded-xl cyber-font text-xl font-bold tracking-widest text-black mb-3 relative overflow-hidden" style="background:var(--theme);">
+                <span style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shimmer 1.5s infinite;"></span>
+                <i class="fa-solid fa-rotate-right mr-2"></i> RIVINCITA — ORA
             </button>
-            <button id="btn-menu" class="btn-ui w-full py-4 rounded-xl bg-black border border-white/20 text-white font-bold tracking-widest text-sm uppercase">
-                Ritorna alla Base
+            <button id="btn-menu" class="btn-ui w-full py-3 rounded-xl bg-transparent border border-white/15 text-gray-400 font-bold tracking-widest text-xs uppercase hover:text-white hover:border-white/40 transition">
+                Ritorna al Menu
             </button>
         </div>
     </div>
@@ -366,27 +610,116 @@
 let audioCtx;
 function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 function playSfx(type) {
-    if(!audioCtx || audioCtx.state !== 'running') return;
-    const t = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.connect(g); g.connect(audioCtx.destination);
-    
-    if(type === 'shoot') { o.type = 'square'; o.frequency.setValueAtTime(500, t); o.frequency.exponentialRampToValueAtTime(80, t+0.1); g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.1); o.start(); o.stop(t+0.1); } 
-    else if(type === 'hit') { o.type = 'triangle'; o.frequency.setValueAtTime(1200, t); o.frequency.exponentialRampToValueAtTime(1800, t+0.05); g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0.001, t+0.05); o.start(); o.stop(t+0.05); } 
-    else if(type === 'headshot') { o.type = 'square'; o.frequency.setValueAtTime(2200, t); o.frequency.exponentialRampToValueAtTime(800, t+0.15); g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.15); o.start(); o.stop(t+0.15); } 
-    else if(type === 'kill') { o.type = 'sine'; o.frequency.setValueAtTime(600, t); o.frequency.exponentialRampToValueAtTime(1400, t+0.2); g.gain.setValueAtTime(0.2, t); g.gain.linearRampToValueAtTime(0.001, t+0.2); o.start(); o.stop(t+0.2); } 
-    else if(type === 'manga-slash') { 
-        o.type = 'sawtooth'; o.frequency.setValueAtTime(1200, t); o.frequency.exponentialRampToValueAtTime(100, t+0.35); g.gain.setValueAtTime(0.6, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.35); o.start(); o.stop(t+0.35); 
-        const o2 = audioCtx.createOscillator(), g2 = audioCtx.createGain(); o2.type = 'square'; o2.frequency.setValueAtTime(4000, t); o2.frequency.exponentialRampToValueAtTime(200, t+0.15); g2.gain.setValueAtTime(0.3, t); g2.gain.exponentialRampToValueAtTime(0.001, t+0.15); o2.connect(g2); g2.connect(audioCtx.destination); o2.start(); o2.stop(t+0.15);
-    }
-    else if(type === 'dash') { o.type = 'sawtooth'; o.frequency.setValueAtTime(80, t); o.frequency.linearRampToValueAtTime(800, t+0.2); g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0.001, t+0.3); o.start(); o.stop(t+0.3); } 
-    else if(type === 'dmg') { o.type = 'sawtooth'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(30, t+0.5); g.gain.setValueAtTime(0.7, t); g.gain.linearRampToValueAtTime(0.001, t+0.5); o.start(); o.stop(t+0.5); }
-    else if(type === 'hover') { o.type = 'sine'; o.frequency.setValueAtTime(900, t); g.gain.setValueAtTime(0.02, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.05); o.start(); o.stop(t+0.05); }
-    else if(type === 'click') { o.type = 'square'; o.frequency.setValueAtTime(1500, t); o.frequency.exponentialRampToValueAtTime(800, t+0.1); g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.1); o.start(); o.stop(t+0.1); }
-    else if(type === 'jump') { o.type = 'triangle'; o.frequency.setValueAtTime(200, t); o.frequency.exponentialRampToValueAtTime(600, t+0.3); g.gain.setValueAtTime(0.1, t); g.gain.linearRampToValueAtTime(0.001, t+0.3); o.start(); o.stop(t+0.3); }
-    else if(type === 'record') { o.type = 'square'; o.frequency.setValueAtTime(400, t); o.frequency.linearRampToValueAtTime(800, t+0.2); o.frequency.linearRampToValueAtTime(1200, t+0.4); g.gain.setValueAtTime(0.15, t); g.gain.linearRampToValueAtTime(0.001, t+0.8); o.start(); o.stop(t+0.8); }
-    else if(type === 'levelup') { 
-        o.type = 'sawtooth'; o.frequency.setValueAtTime(200, t); o.frequency.linearRampToValueAtTime(800, t+0.15); o.frequency.linearRampToValueAtTime(1800, t+0.4); g.gain.setValueAtTime(0.3, t); g.gain.linearRampToValueAtTime(0.001, t+0.5); o.start(); o.stop(t+0.5);
+    if(!audioCtx) return;
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const t = audioCtx.currentTime;
+    const mk = (wave,f0,f1,dur,vol,delay=0) => {
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type=wave; o.frequency.setValueAtTime(f0,t+delay);
+        if(f1) o.frequency.exponentialRampToValueAtTime(f1,t+delay+dur);
+        g.gain.setValueAtTime(vol,t+delay); g.gain.exponentialRampToValueAtTime(0.0001,t+delay+dur);
+        o.connect(g); g.connect(audioCtx.destination); o.start(t+delay); o.stop(t+delay+dur+0.01);
+    };
+    const noise = (dur,vol,freq=800,delay=0) => {
+        const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*dur,audioCtx.sampleRate);
+        const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+        const src=audioCtx.createBufferSource(),flt=audioCtx.createBiquadFilter(),g=audioCtx.createGain();
+        src.buffer=buf; flt.type='lowpass'; flt.frequency.value=freq;
+        src.connect(flt); flt.connect(g); g.connect(audioCtx.destination);
+        g.gain.setValueAtTime(vol,t+delay); g.gain.exponentialRampToValueAtTime(0.0001,t+delay+dur);
+        src.start(t+delay); src.stop(t+delay+dur+0.01);
+    };
+
+    switch(type) {
+        case 'shoot':
+            mk('square',820,55,0.09,0.12);
+            mk('sawtooth',1200,200,0.06,0.08);
+            noise(0.06,0.18,1200);
+            break;
+        case 'shoot2': // sparo potenziato (livello alto)
+            mk('square',1100,60,0.1,0.18);
+            mk('sawtooth',2000,150,0.08,0.1);
+            noise(0.08,0.25,2000);
+            mk('sine',440,220,0.12,0.06,0.02);
+            break;
+        case 'hit':
+            mk('triangle',1800,2400,0.04,0.22);
+            noise(0.04,0.18,2500);
+            break;
+        case 'headshot':
+            mk('square',3200,600,0.15,0.4);
+            mk('sine',1600,3200,0.08,0.25,0.05);
+            noise(0.05,0.2,3000);
+            // Echo
+            mk('sine',800,400,0.2,0.12,0.1);
+            break;
+        case 'kill':
+            mk('sine',880,1760,0.18,0.3);
+            mk('triangle',440,880,0.12,0.2,0.06);
+            noise(0.08,0.15,1000);
+            break;
+        case 'manga-slash':
+            mk('sawtooth',2400,80,0.28,0.7);
+            mk('square',4800,300,0.18,0.4);
+            noise(0.12,0.4,4000);
+            mk('sine',800,200,0.15,0.25,0.05);
+            break;
+        case 'dash':
+            mk('sawtooth',100,1600,0.18,0.2);
+            mk('sine',200,1200,0.15,0.15,0.05);
+            noise(0.1,0.12,1600);
+            break;
+        case 'dmg':
+            mk('sawtooth',180,25,0.45,0.7);
+            noise(0.3,0.5,400);
+            mk('square',60,30,0.3,0.4);
+            break;
+        case 'hover':
+            mk('sine',1200,900,0.04,0.025);
+            break;
+        case 'click':
+            mk('square',1800,900,0.08,0.06);
+            break;
+        case 'jump':
+            mk('triangle',250,900,0.22,0.12);
+            mk('sine',180,700,0.18,0.08);
+            break;
+        case 'record':
+            [0,0.12,0.24,0.38].forEach((d,i)=>mk('sine',[523,659,784,1047][i],[659,784,1047,2093][i],0.18,0.25,d));
+            break;
+        case 'levelup':
+            [0,0.1,0.2,0.32,0.46].forEach((d,i)=>mk('sawtooth',[300,400,500,700,1000][i],[400,500,700,1000,2000][i],0.18,0.35,d));
+            noise(0.6,0.15,600,0.1);
+            break;
+        case 'combo_high': // Combo ≥7
+            mk('square',1600,3200,0.2,0.5);
+            mk('sawtooth',800,2400,0.15,0.35,0.05);
+            noise(0.15,0.3,3200);
+            break;
+        case 'powerup':
+            mk('sine',880,1760,0.25,0.35);
+            mk('triangle',660,1320,0.2,0.25,0.08);
+            [0,0.06,0.12].forEach(d=>mk('square',2000,4000,0.06,0.2,d));
+            break;
+        case 'scream': {
+            const freqs=[700,1000,600,1200,900,800];
+            const f=freqs[Math.floor(Math.random()*freqs.length)];
+            mk('sawtooth',f,f*0.3,0.4,0.22);
+            mk('square',f*1.4,f*0.4,0.3,0.12,0.03);
+            noise(0.2,0.12,f*2);
+            break;
+        }
+        case 'wave_start':
+            [0,0.15,0.3,0.45,0.6].forEach((d,i)=>mk('sawtooth',[200,280,360,480,600][i],null,0.2,0.28,d));
+            noise(0.8,0.15,400);
+            break;
+        case 'reload':
+            mk('square',600,400,0.08,0.1);
+            mk('sawtooth',300,600,0.12,0.15,0.15);
+            break;
     }
 }
+
 
 document.querySelectorAll('button, .color-selector').forEach(btn => { btn.addEventListener('mouseenter', () => playSfx('hover')); btn.addEventListener('click', () => { initAudio(); playSfx('click'); }); });
 
@@ -428,11 +761,16 @@ async function fetchLeaderboard() {
             const data = doc.data();
             let rankStyle = rank === 1 ? 'text-yellow-400 text-xl drop-shadow-[0_0_8px_yellow]' : rank === 2 ? 'text-gray-300 text-lg' : rank === 3 ? 'text-orange-400 text-lg' : 'text-gray-500';
             let isMe = (data.nickname === ME.nick) ? 'bg-[var(--theme)]/20 border-l-4 border-[var(--theme)]' : 'border-b border-white/5 hover:bg-white/5 transition';
-            html += `<tr class="${isMe}"><td class="p-3 font-bold cyber-font ${rankStyle}">#${rank}</td><td class="p-3 font-black tracking-widest uppercase text-white">${data.nickname || 'IGNOTO'}</td><td class="p-3 text-right cyber-font text-[var(--theme)] text-lg">${data.bestScore || 0}</td></tr>`;
+            const rankEmoji = rank===1?'👑':rank===2?'🥈':rank===3?'🥉':'💀';
+            const scoreVal = Math.max(data.bestScore||0, data.highScore||0);
+            html += `<tr class="${isMe} cursor-default"><td class="p-2 font-bold cyber-font ${rankStyle} text-center">${rankEmoji}</td><td class="p-2 font-black tracking-widest uppercase text-white text-sm">${data.nickname || 'IGNOTO'}</td><td class="p-2 text-right cyber-font text-[var(--theme)]">${scoreVal.toLocaleString()}</td></tr>`;
             rank++;
         });
         html += '</tbody></table>';
         lbContainer.innerHTML = html;
+        // Taunt basato sulla classifica
+        const LOBBY_TAUNTS=["🔥 Puoi battere il #1?","💀 Quanti libanesi riesci a uccidere?","⚡ Top 3 ti aspetta","🏆 Il record non si difende da solo","🎯 Mirino pronto?"];
+        const lt=document.getElementById('lobby-taunt'); if(lt) lt.innerText=LOBBY_TAUNTS[Math.floor(Math.random()*LOBBY_TAUNTS.length)];
     } catch(e) { lbContainer.innerHTML = '<div class="text-center text-red-500 font-bold uppercase tracking-widest mt-6"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Errore Server Database</div>'; }
 }
 document.getElementById('btn-refresh-lb').onclick = fetchLeaderboard;
@@ -1236,6 +1574,11 @@ async function gameOver() {
     document.getElementById('hud').classList.add('hidden'); document.getElementById('xhair').classList.add('hidden'); document.getElementById('mob-ctrl').classList.add('hidden'); document.getElementById('altitude-warning').style.opacity = '0';
     document.getElementById('reload-indicator').classList.add('hidden');
     document.getElementById('go-score').innerText = score; document.getElementById('go-combo').innerText = maxCombo;
+    const goLvl = document.getElementById('go-level'); if(goLvl) goLvl.innerText = currentLevel;
+    const TAUNTS = ["TROPPO LENTO, MOSCHINO","I LIBANESI TI RINGRAZIANO","POTEVI STARE A CASA","NEANCHE UNA STRISCIA DECENTE","LA BARBA HA VINTO","ONDATA 1? SUL SERIO?","RITORNA QUANDO SEI PRONTO","CHE FIGURACCIA"];
+    const gt = document.getElementById('go-taunt'); if(gt) gt.innerText = TAUNTS[Math.floor(Math.random()*TAUNTS.length)];
+    // Shake schermo all'entrata gameover
+    document.body.classList.add('brutal-shaking'); setTimeout(()=>document.body.classList.remove('brutal-shaking'),600);
     
     speedLines.forEach(l => l.visible = false);
     ammoPickups.forEach(p => scene.remove(p)); ammoPickups.length = 0;
@@ -1304,6 +1647,427 @@ document.getElementById('m-reload').addEventListener('touchstart', e => { e.prev
 document.getElementById('m-dash').addEventListener('touchstart', e => { e.preventDefault(); doDash(); }, {passive:false}); // Scatto esplosivo trigger da mobile
 
 window.onload = init3D;
+
+// ==========================================
+// LOBBY PARTICLES - particelle atmosferiche
+// ==========================================
+(function lobbyParticles() {
+    const canvas = document.getElementById('lobby-particles');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+    for(let i=0;i<80;i++) particles.push({
+        x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+        vx:(Math.random()-.5)*.4, vy:-.3-Math.random()*.5,
+        r:Math.random()*2+.5, opacity:Math.random()*.7+.1,
+        color:`hsl(${80+Math.random()*40},100%,${50+Math.random()*30}%)`
+    });
+    function loop() {
+        if(!document.getElementById('lobby').classList.contains('hidden')) {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p=>{
+                p.x+=p.vx; p.y+=p.vy;
+                if(p.y<-10){p.y=canvas.height+10;p.x=Math.random()*canvas.width;}
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+                ctx.fillStyle=p.color; ctx.globalAlpha=p.opacity*(0.7+Math.sin(Date.now()*.001+p.x)*.3);
+                ctx.fill();
+            });
+            ctx.globalAlpha=1;
+        }
+        requestAnimationFrame(loop);
+    }
+    loop();
+})();
+
+// ==========================================
+// MUSICA ARABICA DI SOTTOFONDO
+// ==========================================
+let bgMusicActive = false;
+const bgNodes = [];
+function startArabicMusic() {
+    if(!audioCtx || bgMusicActive) return;
+    bgMusicActive = true;
+    // Scala arabica maqam rast
+    const scale = [261.6,293.7,329.6,349.2,392.0,440.0,466.2,523.3,587.3,659.3];
+    let step = 0;
+    function playNote() {
+        if(!bgMusicActive||!gameActive) return;
+        const t=audioCtx.currentTime, n=scale[step%scale.length]; step++;
+        const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+        o.type='triangle'; o.frequency.value=n;
+        g.gain.setValueAtTime(.035,t); g.gain.exponentialRampToValueAtTime(.001,t+.55);
+        o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t+.6);
+        bgNodes.push(o);
+        setTimeout(playNote, 280+Math.random()*180);
+    }
+    function playDrum() {
+        if(!bgMusicActive||!gameActive) return;
+        const t=audioCtx.currentTime;
+        const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*.12,audioCtx.sampleRate);
+        const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+        const src=audioCtx.createBufferSource(),flt=audioCtx.createBiquadFilter(),g=audioCtx.createGain();
+        src.buffer=buf; flt.type='lowpass'; flt.frequency.value=180;
+        src.connect(flt); flt.connect(g); g.connect(audioCtx.destination);
+        g.gain.setValueAtTime(.05,t); g.gain.exponentialRampToValueAtTime(.001,t+.12);
+        src.start(t); bgNodes.push(src);
+        const drumPattern=[380,380,560,380]; setTimeout(playDrum,drumPattern[Math.floor(step/2)%4]);
+    }
+    playNote(); playDrum();
+}
+function stopArabicMusic() { bgMusicActive=false; bgNodes.length=0; }
+
+// ==========================================
+// HOOK IN startMission e gameOver
+// ==========================================
+const _origStart = startMission;
+startMission = function() {
+    _origStart();
+    setTimeout(()=>{initAudio(); startArabicMusic();},200);
+};
+const _origGameOver = gameOver;
+gameOver = async function() {
+    stopArabicMusic();
+    await _origGameOver();
+};
+
+// ==========================================  
+// HP CRITICO - xhair lampeggia rosso + drone urla
+// ==========================================
+setInterval(()=>{
+    if(!gameActive) return;
+    const xh=document.getElementById('xhair');
+    if(hp===1) { if(xh) xh.classList.add('xhair-low-hp'); if(droneOsc&&audioCtx) droneOsc.frequency.setValueAtTime(120,audioCtx.currentTime); }
+    else { if(xh) xh.classList.remove('xhair-low-hp'); if(droneOsc&&audioCtx) droneOsc.frequency.setValueAtTime(60,audioCtx.currentTime); }
+},500);
+
+// ==========================================
+// SCREEN EDGE ALERT - rosso ai bordi quando nemico vicino
+// ==========================================
+setInterval(()=>{
+    if(!gameActive||!enemies||!camera) return;
+    let minDist=999;
+    enemies.forEach(e=>{ const d=camera.position.distanceTo(e.position); if(d<minDist) minDist=d; });
+    const flash=document.getElementById('dmg-screen');
+    if(flash&&minDist<8) { flash.style.opacity=Math.max(0,(8-minDist)/8*.3).toFixed(2); }
+    else if(flash) flash.style.opacity='0';
+},100);
+
+
+// ==========================================
+// EFFETTO ANSIA - ULTIMI 10 SECONDI (BATTITO & CLIMAX)
+// ==========================================
+let isAnxietyMode = false;
+let lastTimeLeft = -1;
+
+setInterval(() => {
+    if (typeof gameActive !== 'undefined' && !gameActive) {
+        if (isAnxietyMode) resetAnxietyMode();
+        return;
+    }
+
+    const timerEl = document.getElementById('hud-time');
+    const screenFx = document.getElementById('overlay-fx');
+    if (!timerEl) return;
+
+    const timeLeft = parseInt(timerEl.innerText, 10);
+
+    if (timeLeft <= 10 && timeLeft > 0) {
+        if (!isAnxietyMode) {
+            isAnxietyMode = true;
+            timerEl.classList.add('anxiety-timer-active');
+            if(screenFx) screenFx.classList.add('anxiety-screen-flash');
+        }
+
+        // CALCOLO DEL CLIMAX: intensità sale da 1 (a 10 sec) a 10 (a 1 sec)
+        const climaxIntensity = 11 - timeLeft; 
+
+        // Più scende il tempo, più diventa grande (scala fino a 3.5x) e pulsa veloce
+        timerEl.style.setProperty('--ansia-scale', 1 + (climaxIntensity * 0.25));
+        timerEl.style.setProperty('--ansia-speed', Math.max(0.15, 0.7 - (climaxIntensity * 0.05)) + 's');
+        if(screenFx) screenFx.style.setProperty('--ansia-alpha', 0.1 + (climaxIntensity * 0.02));
+
+        // Suona il battito cardiaco solo al cambio del secondo esatto
+        if (timeLeft !== lastTimeLeft) {
+            lastTimeLeft = timeLeft;
+            playHeartbeat(climaxIntensity);
+        }
+
+    } else {
+        if (isAnxietyMode) resetAnxietyMode();
+    }
+}, 100);
+
+// Generatore sonoro del battito cardiaco
+function playHeartbeat(intensity) {
+    if(typeof audioCtx === 'undefined' || !audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    // Suono profondo a bassa frequenza (stile bass-drop/cuore)
+    osc.type = 'sine'; 
+    const baseFreq = 60 + (intensity * 5); // Frequenza sale leggermente col panico
+    osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.3);
+
+    // Volume dinamico col climax
+    const vol = Math.min(0.9, 0.4 + (intensity * 0.05));
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+
+    // Tachicardia finale: doppio battito quando mancano meno di 4 secondi
+    if (intensity >= 7) {
+        setTimeout(() => {
+            if(typeof audioCtx === 'undefined' || !audioCtx) return;
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(baseFreq + 10, audioCtx.currentTime);
+            osc2.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 0.2);
+            gain2.gain.setValueAtTime(vol * 0.5, audioCtx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start();
+            osc2.stop(audioCtx.currentTime + 0.2);
+        }, 180); 
+    }
+}
+
+function resetAnxietyMode() {
+    isAnxietyMode = false;
+    lastTimeLeft = -1;
+    const timerEl = document.getElementById('hud-time');
+    const screenFx = document.getElementById('overlay-fx');
+    if (timerEl) {
+        timerEl.classList.remove('anxiety-timer-active');
+        timerEl.style.removeProperty('--ansia-scale');
+        timerEl.style.removeProperty('--ansia-speed');
+    }
+    if (screenFx) {
+        screenFx.classList.remove('anxiety-screen-flash');
+        screenFx.style.removeProperty('--ansia-alpha');
+    }
+}
+
+// ==========================================
+
+// ==========================================
+// EXTREME VISUAL EFFECTS COMBO ENGINE
+// ==========================================
+let comboVal = 0;
+let comboTimeLeft = 0; 
+let comboDecayInterval = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Aggiungo il flash overlay per il sangue
+    if(!document.getElementById('brutal-screen-flash')) {
+        const flash = document.createElement('div');
+        flash.id = 'brutal-screen-flash';
+        document.body.appendChild(flash);
+    }
+
+    const panel = document.getElementById('panel-combo');
+    if(panel) {
+        panel.innerHTML = `
+            <div id="brutal-letter" class="brutal-rank-letter">D</div>
+            <div id="brutal-word" class="brutal-rank-word">DULL</div>
+            <div id="hud-combo">X0</div>
+            <div class="brutal-decay-container">
+                <div id="brutal-bar" class="brutal-decay-bar"></div>
+            </div>
+        `;
+        panel.className = "absolute z-50 flex";
+    }
+    
+    if(comboDecayInterval) clearInterval(comboDecayInterval);
+    comboDecayInterval = setInterval(() => {
+        if (typeof gameActive !== 'undefined' && !gameActive) return;
+        
+        if (currentCombo > 0) {
+            let baseDecay = 0.6;
+            let scaling = Math.min(0.8, currentCombo * 0.03);
+            comboTimeLeft -= (baseDecay + scaling);
+            
+            const bar = document.getElementById('brutal-bar');
+            if (bar) {
+                bar.style.width = Math.max(0, comboTimeLeft) + '%';
+                
+                if (comboTimeLeft <= 30) {
+                    bar.style.backgroundColor = (Math.random() > 0.5) ? '#ef4444' : '#000';
+                } else {
+                    bar.style.backgroundColor = getTierColor(currentCombo);
+                }
+            }
+            
+            if (comboTimeLeft <= 0) {
+                currentCombo = 0;
+                updateComboUI();
+            }
+        }
+    }, 30);
+});
+
+function getTierColor(combo) {
+    if(combo >= 20) return '#a3e635'; 
+    if(combo >= 15) return '#a855f7'; 
+    if(combo >= 11) return '#ec4899'; 
+    if(combo >= 8)  return '#ef4444'; 
+    if(combo >= 5)  return '#f97316'; 
+    if(combo >= 3)  return '#fbbf24'; 
+    if(combo >= 2)  return '#38bdf8'; 
+    return '#94a3b8'; 
+}
+
+// Genera particelle fisiche esplosive intorno alla combo
+function spawnComboParticles(color) {
+    const panel = document.getElementById('panel-combo');
+    if(!panel) return;
+    
+    for(let i=0; i<8; i++) {
+        const p = document.createElement('div');
+        p.className = 'combo-particle';
+        p.style.color = color;
+        p.style.backgroundColor = color;
+        
+        // Direzione casuale radiale
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 100 + Math.random() * 150;
+        p.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+        p.style.setProperty('--ty', `${Math.sin(angle) * dist}px`);
+        
+        panel.appendChild(p);
+        setTimeout(() => p.remove(), 400);
+    }
+}
+
+// Applica il tremolio allo schermo intero e il flash del sangue
+function applyBrutalScreenEffects(combo) {
+    const body = document.body;
+    const flash = document.getElementById('brutal-screen-flash');
+    
+    // 1. SCREEN SHAKE (Scala con la combo)
+    if(combo >= 3) {
+        body.classList.remove('shake-active');
+        void body.offsetWidth;
+        // Intensità tramite durata e animazione
+        body.classList.add('shake-active');
+        setTimeout(() => body.classList.remove('shake-active'), 250);
+    }
+    
+    // 2. SANGUE/VIGNETTA LAMPEGGIANTE (Pulsazione viscerale)
+    if(flash && combo > 0) {
+        const intensity = Math.min(100, combo * 5); // Fino a 100px di inset shadow rosso
+        flash.style.boxShadow = `inset 0 0 ${intensity}px rgba(255, 0, 0, ${Math.min(0.6, combo*0.05)})`;
+        setTimeout(() => {
+            if(flash) flash.style.boxShadow = 'inset 0 0 0px rgba(255,0,0,0)';
+        }, 150);
+    }
+}
+
+// Suono in pitch shifting crescente
+function playComboPitchSound(combo) {
+    if(typeof audioCtx === 'undefined' || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    // Onda sega super tagliente
+    osc.type = 'sawtooth';
+    
+    // Il pitch sale all'infinito con la combo (effetto gasante)
+    const baseFreq = 220 + (combo * 30);
+    osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 2, audioCtx.currentTime + 0.15);
+    
+    // Distorsione/Volume punch
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.15);
+}
+
+// Sovrascrittura definitiva UI
+updateComboUI = function() {
+    const panel = document.getElementById('panel-combo');
+    const letter = document.getElementById('brutal-letter');
+    const word = document.getElementById('brutal-word');
+    const txt = document.getElementById('hud-combo');
+    
+    if(!panel || !letter || !word || !txt) return;
+
+    if(currentCombo > 0) {
+        comboTimeLeft = 100;
+        
+        panel.classList.add('brutal-active');
+        txt.innerText = `X${currentCombo}`;
+        
+        // Animazione impatto HUD
+        panel.classList.remove('brutal-hit-active');
+        void panel.offsetWidth;
+        panel.classList.add('brutal-hit-active');
+
+        // Applica effetti globali (Shake + Vignetta)
+        applyBrutalScreenEffects(currentCombo);
+
+        // Suono custom
+        playComboPitchSound(currentCombo);
+
+        const color = getTierColor(currentCombo);
+        
+        // Spawn esplosione di particelle dalla combo
+        spawnComboParticles(color);
+
+        letter.className = "brutal-rank-letter";
+        word.style.color = color;
+        word.style.borderColor = color;
+        
+        if(currentCombo >= 20) {
+            letter.innerText = "ULTRA";
+            word.innerText = "KILLSHOT";
+            letter.classList.add('btier-god');
+        } else if(currentCombo >= 15) {
+            letter.innerText = "SSS";
+            word.innerText = "SHITSTORM";
+            letter.classList.add('btier-sss');
+        } else if(currentCombo >= 11) {
+            letter.innerText = "SS";
+            word.innerText = "SADISTIC";
+            letter.classList.add('btier-ss');
+        } else if(currentCombo >= 8) {
+            letter.innerText = "S";
+            word.innerText = "SUPREME";
+            letter.classList.add('btier-s');
+        } else if(currentCombo >= 5) {
+            letter.innerText = "A";
+            word.innerText = "ANARCHIC";
+            letter.classList.add('btier-a');
+        } else if(currentCombo >= 3) {
+            letter.innerText = "B";
+            word.innerText = "BRUTAL";
+            letter.classList.add('btier-b');
+        } else if(currentCombo >= 2) {
+            letter.innerText = "C";
+            word.innerText = "CHAOTIC";
+            letter.classList.add('btier-c');
+        } else {
+            letter.innerText = "D";
+            word.innerText = "DESTRUCTIVE";
+            letter.classList.add('btier-d');
+        }
+    } else {
+        panel.classList.remove('brutal-active');
+    }
+};
 </script>
 </body>
 </html>
